@@ -6,6 +6,7 @@ import methodOverride from 'method-override';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import routes from './node/routes/index.js';
+import ejsMate from 'ejs-mate';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(
 );
 
 const __dirname = path.resolve();
+app.engine('ejs', ejsMate);
 app.set('views', path.join(__dirname, 'node/views'));
 app.set('view engine', 'ejs');
 
