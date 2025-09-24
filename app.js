@@ -40,9 +40,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.locals.routeIs = (name) => app.locals.currentRouteName === name;
 
 app.use((req, res, next) => {
+  const oldSnapshot = Object.assign({}, req.session._old || {});
+  const errorsSnapshot = Object.assign({}, req.session._errors || {});
   res.locals.session = req.session;
-  res.locals.old = (key, fallback = '') => (req.session._old && req.session._old[key]) || fallback;
-  res.locals.errors = req.session._errors || {};
+  res.locals.errors = errorsSnapshot;
+  res.locals.old = (key, fallback = '') => {
+    if (!key) return fallback;
+    const parts = key.split('.');
+    let cur = oldSnapshot;
+    for (const p of parts) {
+      if (cur && Object.prototype.hasOwnProperty.call(cur, p)) {
+        cur = cur[p];
+      } else {
+        return fallback;
+      }
+    }
+    return cur ?? fallback;
+  };
   req.session._old = {};
   req.session._errors = {};
   next();

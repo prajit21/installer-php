@@ -43,7 +43,7 @@ export const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); return res.redirect('back'); }
+    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); req.session._old = req.body; return res.redirect('back'); }
     const { license, envato_username } = req.body;
     const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
       key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip

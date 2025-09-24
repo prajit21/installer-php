@@ -7,13 +7,15 @@
         <div class="form-group form-row">
           <label>Envato Username<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="envato_username" value="" class="form-control" autocomplete="off">
+            <input type="text" name="envato_username" value="<%= old('envato_username','') %>" class="form-control" autocomplete="off">
+            <% if (errors.envato_username) { %><span class="text-danger"><%= errors.envato_username %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Purchase Code<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="license" value="" class="form-control" autocomplete="off">
+            <input type="text" name="license" value="<%= old('license','') %>" class="form-control" autocomplete="off">
+            <% if (errors.license) { %><span class="text-danger"><%= errors.license %></span><% } %>
           </div>
         </div>
         <div>
