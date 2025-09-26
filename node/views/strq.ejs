@@ -7,7 +7,7 @@
         <tr><th>Extensions</th><th>Status</th></tr>
       </thead>
       <tbody>
-      <% Object.keys(configurations).forEach(function(key){ %>
+      <% Object.keys(configurations).forEach(function(key) { %>
         <tr>
           <td><%= key %></td>
           <td class="icon-success"><i class="fa-solid fa-<%= configurations[key] ? 'check' : 'times' %>"></i></td>

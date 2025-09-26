@@ -5,7 +5,7 @@
     <table class="table">
       <thead><tr><th>Please make sure the PHP extensions listed below are installed</th><th>status</th></tr></thead>
       <tbody>
-      <% Object.keys(directories).forEach(function(dir){ %>
+      <% Object.keys(directories).forEach(function(dir) { %>
         <tr>
           <td><%= dir %></td>
           <td class="icon-success"><i class="fas fa-<%= directories[dir] ? 'check' : 'times' %>"></i></td>
