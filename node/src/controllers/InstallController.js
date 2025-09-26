@@ -35,6 +35,8 @@ export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
   const dirsConfigured = await getDirsConfigured();
   if (!dirsConfigured) return res.redirect('/install/directories');
+  // Clear previous residual license files before showing license page
+  for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('/install/database');
   res.render('stlic');
 }
@@ -119,7 +121,11 @@ export async function getErase(req, res) {
   return res.json({ success: true });
 }
 
-export async function getUnblock(req, res) { res.render('stbl'); }
+export async function getUnblock(req, res) {
+  // pHUnBlic(): remove block flag
+  await fs.remove(path.join(basePath(), '.vite.js'));
+  return res.json({ success: true });
+}
 
 export async function postResetLicense(req, res) {
   const fp = path.join(basePath(), 'fzip.li.dic');
@@ -129,6 +135,14 @@ export async function postResetLicense(req, res) {
     return res.status(rp?.status || 500).json(rp?.data || {});
   }
   return res.status(404).json({ message: 'Not Found' });
+}
+
+export async function getBlockProject(req, res) {
+  if (req.params.project_id !== process.env.APP_ID) return res.status(400).json({ error: 'Invalid Project ID' });
+  const vite = path.join(basePath(), '.vite.js');
+  if (!(await fs.pathExists(vite))) await fs.writeFile(vite, '');
+  for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
+  return res.json({ success: true });
 }
 
 function mapErrors(result) {
