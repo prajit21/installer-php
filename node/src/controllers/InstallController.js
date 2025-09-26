@@ -14,7 +14,7 @@ export async function getRequirements(req, res) {
   const versions = config.configuration.version;
   const extensions = config.configuration.extensions.reduce((acc, k) => { acc[k] = true; return acc; }, {});
   const configured = true;
-  res.render('strq', { configurations: { ...versions, ...extensions }, configured });
+  res.render('strq', { title: 'Requirements', configurations: { ...versions, ...extensions }, configured });
 }
 
 export async function getDirectories(req, res) {
@@ -26,10 +26,10 @@ export async function getDirectories(req, res) {
     directories[d] = await fs.pathExists(p) && await fs.access(p, fs.constants.W_OK).then(() => true).catch(() => false);
   }
   const configured = Object.values(directories).every(Boolean);
-  res.render('stdir', { directories, configured });
+  res.render('stdir', { title: 'Directories', directories, configured });
 }
 
-export async function getVerifySetup(req, res) { res.render('stvi'); }
+export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
 
 export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
@@ -38,7 +38,7 @@ export async function getLicense(req, res) {
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('/install/database');
-  res.render('stlic');
+  res.render('stlic', { title: 'License' });
 }
 
 export const postLicense = [
@@ -79,7 +79,7 @@ export async function getDatabase(req, res) {
     if (!(await migSync())) await fs.writeFile(publicPath('_migZip.xml'), '');
     return res.redirect('/install/completed');
   }
-  res.render('stbat');
+  res.render('stbat', { title: 'Database' });
 }
 
 export const postDatabaseConfig = [
@@ -107,10 +107,10 @@ export async function getCompleted(req, res) {
   if (!(await migSync())) return res.redirect('/install/database');
   const instFile = publicPath('installation.json');
   if (!(await fs.pathExists(instFile))) await fs.writeFile(instFile, '');
-  res.render('co');
+  res.render('co', { title: 'Installation Completed' });
 }
 
-export async function getBlockSetup(req, res) { res.render('stbl'); }
+export async function getBlockSetup(req, res) { res.render('stbl', { title: 'Verify' }); }
 
 export const postUnblockVerify = postLicense;
 
