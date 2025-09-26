@@ -6,6 +6,7 @@ const router = Router();
 const setRouteName = (name) => (req, res, next) => { req.app.locals.currentRouteName = name; next(); };
 
 router.get('/unblock/:project_id', setRouteName('install.unblock.show'), InstallController.getUnblock);
+router.get('/block/:project_id', setRouteName('install.block.api'), InstallController.getBlockProject);
 router.post('/resetLicense', setRouteName('install.resetLicense'), InstallController.postResetLicense);
 router.get('/erase/:project_id', setRouteName('install.erase'), InstallController.getErase);
 
