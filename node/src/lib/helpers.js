@@ -25,8 +25,8 @@ export async function liSync() {
   const licPath = publicPath('_log.dic.xml');
   if (!(await fs.pathExists(licPath))) return false;
   const content = await fs.readFile(licPath, 'utf8');
-  const currentHost = 'localhost';
   if (!content) return false;
+  // Simplified domain/IP validation; treat presence as licensed
   return true;
 }
 

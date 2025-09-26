@@ -49,7 +49,19 @@ export const postLicense = [
       key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip
     }).catch(e => e.response);
     if (resp && resp.status === 200) {
-      await fs.writeFile(publicPath('fzip.li.dic'), Buffer.from(String(license)).toString('base64'));
+      const pubDir = path.join(basePath(), 'public');
+      await fs.ensureDir(pubDir);
+      const fzipPath = publicPath('fzip.li.dic');
+      await fs.writeFile(fzipPath, Buffer.from(String(license).trim()).toString('base64'));
+      const logPath = publicPath('_log.dic.xml');
+      const currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+      const cleaned = currentUrl.replace('block/license/verify', '').replace('install/license', '').replace('install/verify', '');
+      if (!(await fs.pathExists(logPath))) {
+        await fs.writeFile(logPath, Buffer.from(cleaned).toString('base64'));
+      }
+      const ipPath = publicPath('cj7kl89.tmp');
+      const serverIp = req.socket?.localAddress || req.ip || '';
+      await fs.writeFile(ipPath, Buffer.from(serverIp).toString('base64'));
       return res.redirect('/install/database');
     }
     req.session._errors = { license: (resp?.data?.message) || 'Verification failed' };
