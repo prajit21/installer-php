@@ -3,7 +3,7 @@ import { body } from 'express-validator';
 export const validateLicenseBody = [
   body('envato_username').notEmpty().withMessage('Envato Username is required'),
   body('license')
-    .notEmpty().withMessage('License is required')
+    .notEmpty().withMessage('License is required').bail()
     .matches(/^([a-f0-9]{8})-(([a-f0-9]{4})-){3}([a-f0-9]{12})$/i)
     .withMessage('Invalid purchase code')
 ];

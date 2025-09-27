@@ -37,7 +37,7 @@ export const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { license, envato_username } = req.body;
     const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
       key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: "TU8xRVFaVjlRTA==", server_ip: req.ip
@@ -78,7 +78,7 @@ export const postDatabaseConfig = [
   ...validateDbBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { database, admin, is_import_data } = req.body;
     await configureDb(database);
     await connectDb(database);
@@ -137,9 +137,10 @@ export async function getBlockProject(req, res) {
   return res.json({ success: true });
 }
 
-function mapErrors(result) {
+function mapErrors(result, firstOnly = false) {
   const out = {};
-  for (const e of result.array()) out[e.path] = e.msg;
+  const arr = firstOnly ? result.array({ onlyFirstError: true }) : result.array();
+  for (const e of arr) out[e.path] = e.msg;
   return out;
 }
 
