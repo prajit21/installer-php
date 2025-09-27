@@ -296,7 +296,7 @@ function migSync()
   // Level 3
   // return eval(Ex9t::xM8qT5K('migSync', '=RkTnLQSDtNAppuU1NjOLZuNKVDIQI9H'));
 
-  //  Level 2
+  // Level 2
   // if (strPrp() && liSync()) {
   //     $fP = public_path(config(xMailBIL('Y29uZmlnLm1pZ3JhdGlvbg==')));
   //     if (strFlExs($fP)) {

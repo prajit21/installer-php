@@ -25,4 +25,3 @@ router.post('/install/database', setRouteName('install.database.config'), ...[].
 router.get('/install/completed', setRouteName('install.completed'), InstallController.getCompleted);
 
 export default router;
-
