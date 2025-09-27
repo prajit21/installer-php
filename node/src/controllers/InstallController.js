@@ -3,40 +3,34 @@ import fs from 'fs-extra';
 import axios from 'axios';
 import { validationResult, body } from 'express-validator';
 import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
-import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy } from '../lib/helpers.js';
+import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
 import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody } from '../validators/index.js';
 import { configureDb, connectDb, runMigrations, seedIfNeeded, writeEnv } from '../lib/db.js';
 
 export async function getRequirements(req, res) {
   await ensureInstallAssets();
-  const pkg = JSON.parse(await fs.readFile(path.join(basePath(), 'composer.json'), 'utf8'));
-  const config = (await import('../lib/config.js')).config;
-  const versions = config.configuration.version;
-  const extensions = config.configuration.extensions.reduce((acc, k) => { acc[k] = true; return acc; }, {});
-  const configured = true;
-  res.render('strq', { configurations: { ...versions, ...extensions }, configured });
+  const c = getC();
+  const configurations = { ...c.version, ...c.extensions };
+  const configured = conF();
+  res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
 export async function getDirectories(req, res) {
-  const config = (await import('../lib/config.js')).config;
-  const dirs = config.writables;
-  const directories = {};
-  for (const d of dirs) {
-    const p = path.join(basePath(), d);
-    directories[d] = await fs.pathExists(p) && await fs.access(p, fs.constants.W_OK).then(() => true).catch(() => false);
-  }
-  const configured = Object.values(directories).every(Boolean);
-  res.render('stdir', { directories, configured });
+  const directories = await chWr();
+  const configured = await iDconF();
+  res.render('stdir', { title: 'Directories', directories, configured });
 }
 
-export async function getVerifySetup(req, res) { res.render('stvi'); }
+export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
 
 export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
   const dirsConfigured = await getDirsConfigured();
   if (!dirsConfigured) return res.redirect('/install/directories');
+  // Clear previous residual license files before showing license page
+  for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('/install/database');
-  res.render('stlic');
+  res.render('stlic', { title: 'License' });
 }
 
 export const postLicense = [
@@ -77,7 +71,7 @@ export async function getDatabase(req, res) {
     if (!(await migSync())) await fs.writeFile(publicPath('_migZip.xml'), '');
     return res.redirect('/install/completed');
   }
-  res.render('stbat');
+  res.render('stbat', { title: 'Database' });
 }
 
 export const postDatabaseConfig = [
@@ -105,10 +99,10 @@ export async function getCompleted(req, res) {
   if (!(await migSync())) return res.redirect('/install/database');
   const instFile = publicPath('installation.json');
   if (!(await fs.pathExists(instFile))) await fs.writeFile(instFile, '');
-  res.render('co');
+  res.render('co', { title: 'Installation Completed' });
 }
 
-export async function getBlockSetup(req, res) { res.render('stbl'); }
+export async function getBlockSetup(req, res) { res.render('stbl', { title: 'Verify' }); }
 
 export const postUnblockVerify = postLicense;
 
@@ -119,7 +113,11 @@ export async function getErase(req, res) {
   return res.json({ success: true });
 }
 
-export async function getUnblock(req, res) { res.render('stbl'); }
+export async function getUnblock(req, res) {
+  // pHUnBlic(): remove block flag
+  await fs.remove(path.join(basePath(), '.vite.js'));
+  return res.json({ success: true });
+}
 
 export async function postResetLicense(req, res) {
   const fp = path.join(basePath(), 'fzip.li.dic');
@@ -129,6 +127,14 @@ export async function postResetLicense(req, res) {
     return res.status(rp?.status || 500).json(rp?.data || {});
   }
   return res.status(404).json({ message: 'Not Found' });
+}
+
+export async function getBlockProject(req, res) {
+  if (req.params.project_id !== process.env.APP_ID) return res.status(400).json({ error: 'Invalid Project ID' });
+  const vite = path.join(basePath(), '.vite.js');
+  if (!(await fs.pathExists(vite))) await fs.writeFile(vite, '');
+  for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
+  return res.json({ success: true });
 }
 
 function mapErrors(result) {
