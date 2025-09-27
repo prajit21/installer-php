@@ -3,29 +3,21 @@ import fs from 'fs-extra';
 import axios from 'axios';
 import { validationResult, body } from 'express-validator';
 import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
-import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy } from '../lib/helpers.js';
+import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
 import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody } from '../validators/index.js';
 import { configureDb, connectDb, runMigrations, seedIfNeeded, writeEnv } from '../lib/db.js';
 
 export async function getRequirements(req, res) {
   await ensureInstallAssets();
-  const pkg = JSON.parse(await fs.readFile(path.join(basePath(), 'composer.json'), 'utf8'));
-  const config = (await import('../lib/config.js')).config;
-  const versions = config.configuration.version;
-  const extensions = config.configuration.extensions.reduce((acc, k) => { acc[k] = true; return acc; }, {});
-  const configured = true;
-  res.render('strq', { title: 'Requirements', configurations: { ...versions, ...extensions }, configured });
+  const c = getC();
+  const configurations = { ...c.version, ...c.extensions };
+  const configured = conF();
+  res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
 export async function getDirectories(req, res) {
-  const config = (await import('../lib/config.js')).config;
-  const dirs = config.writables;
-  const directories = {};
-  for (const d of dirs) {
-    const p = path.join(basePath(), d);
-    directories[d] = await fs.pathExists(p) && await fs.access(p, fs.constants.W_OK).then(() => true).catch(() => false);
-  }
-  const configured = Object.values(directories).every(Boolean);
+  const directories = await chWr();
+  const configured = await iDconF();
   res.render('stdir', { title: 'Directories', directories, configured });
 }
 

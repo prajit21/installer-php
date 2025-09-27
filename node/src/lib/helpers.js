@@ -2,6 +2,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import axios from 'axios';
 import { basePath, publicPath } from './paths.js';
+import { config as cfg } from './config.js';
+import semver from 'semver';
 
 export function strPrp() {
   if (!process.env.APP_ID) throw new Error('Removed APP ID');
@@ -65,4 +67,34 @@ export function scDotPkS() { return process.env.DOTENV_EDIT === 'true'; }
 export function scSpatPkS() { return process.env.SPATIE_ENABLED === 'true'; }
 
 export async function imIMgDuy() { return true; }
+
+export function getC() {
+  const results = { version: {}, extensions: {} };
+  const requiredNode = Object.values(cfg.configuration.version)[0];
+  results.version[Object.keys(cfg.configuration.version)[0]] = semver.gte(process.versions.node, requiredNode);
+  for (const ext of cfg.configuration.extensions) {
+    results.extensions[ext] = true;
+  }
+  return results;
+}
+
+export function conF() {
+  const c = getC();
+  return Object.values({ ...c.version, ...c.extensions }).every(Boolean);
+}
+
+export async function chWr() {
+  const dirs = cfg.writables;
+  const out = {};
+  for (const d of dirs) {
+    const p = basePath(d);
+    out[d] = (await fs.pathExists(p)) && await fs.access(p, fs.constants.W_OK).then(()=>true).catch(()=>false);
+  }
+  return out;
+}
+
+export async function iDconF() {
+  const w = await chWr();
+  return Object.values(w).every(Boolean);
+}
 
