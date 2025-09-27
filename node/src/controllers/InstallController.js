@@ -12,9 +12,7 @@ export async function getRequirements(req, res) {
   const c = getC();
   const configurations = { ...c.version, ...c.extensions };
   const configured = conF();
-  const directories = await chWr();
-  const dirsConfigured = await iDconF();
-  res.render('strqd', { title: 'Requirements & Directories', configurations, configured, directories, dirsConfigured });
+  res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
 export async function getDirectories(req, res) { return res.redirect('/install/requirements'); }
@@ -23,8 +21,6 @@ export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Ve
 
 export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
-  const dirsConfigured = await getDirsConfigured();
-  if (!dirsConfigured) return res.redirect('/install/requirements');
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('/install/database');

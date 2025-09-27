@@ -31,28 +31,22 @@
                       <div class="icon-center"><i data-feather="chevrons-right"></i></div>
                     </div>
                   </li>
-                  <li class="step-container step-2 <%= routeIs('install.directories') ? 'active' : (routeIs('install.license') || routeIs('install.database') || routeIs('install.completed') ? 'disabled' : '') %>">
-                    <div class="media">
-                      <div class="step-icon"><i class="fas fa-check"></i><span>2</span></div>
-                      <div class="media-body"><h5>Directories</h5><h6>Permissions</h6></div>
-                      <div class="icon-center"><i data-feather="chevrons-right"></i></div>
-                    </div>
-                  </li>
-                  <li class="step-container step-3 <%= routeIs('install.license') ? 'active' : (routeIs('install.database') || routeIs('install.completed') ? 'disabled' : '') %>">
+                  
+                  <li class="step-container step-2 <%= routeIs('install.license') ? 'active' : (routeIs('install.database') || routeIs('install.completed') ? 'disabled' : '') %>">
                     <div class="media">
                       <div class="step-icon"><i class="fas fa-check"></i><span>3</span></div>
                       <div class="media-body"><h5>License</h5><h6>Purchase Code</h6></div>
                       <div class="icon-center"><i data-feather="chevrons-right"></i></div>
                     </div>
                   </li>
-                  <li class="step-container step-4 <%= routeIs('install.database') ? 'active' : (routeIs('install.completed') ? 'disabled' : '') %>">
+                  <li class="step-container step-3 <%= routeIs('install.database') ? 'active' : (routeIs('install.completed') ? 'disabled' : '') %>">
                     <div class="media">
                       <div class="step-icon"><i class="fas fa-check"></i><span>4</span></div>
                       <div class="media-body"><h5>Configuration</h5><h6>Connection Details</h6></div>
                       <div class="icon-center"><i data-feather="chevrons-right"></i></div>
                     </div>
                   </li>
-                  <li class="step-container step-5 <%= routeIs('install.completed') ? 'active' : '' %>">
+                  <li class="step-container step-4 <%= routeIs('install.completed') ? 'active' : '' %>">
                     <div class="media">
                       <div class="step-icon"><i class="fas fa-check"></i><span>5</span></div>
                       <div class="media-body"><h5>Complete</h5><h6>Installation Complete</h6></div>
