@@ -70,8 +70,11 @@ export async function imIMgDuy() { return true; }
 
 export function getC() {
   const results = { version: {}, extensions: {} };
-  const requiredNode = Object.values(cfg.configuration.version)[0];
-  results.version[Object.keys(cfg.configuration.version)[0]] = semver.gte(process.versions.node, requiredNode);
+  const label = Object.keys(cfg.configuration.version)[0];
+  const requiredNodeRaw = Object.values(cfg.configuration.version)[0];
+  const current = semver.coerce(process.versions.node)?.version || '0.0.0';
+  const required = semver.coerce(String(requiredNodeRaw))?.version || '0.0.0';
+  results.version[label] = semver.gte(current, required);
   for (const ext of cfg.configuration.extensions) {
     results.extensions[ext] = true;
   }
