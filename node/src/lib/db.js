@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes } from 'sequelize';
+import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
 
@@ -6,6 +7,7 @@ let sequelize = null;
 let User = null;
 
 export async function configureDb(cfg) {
+  await ensureDatabase(cfg);
   sequelize = new Sequelize(cfg.DB_DATABASE, cfg.DB_USERNAME, cfg.DB_PASSWORD, {
     host: cfg.DB_HOST,
     port: Number(cfg.DB_PORT || 3306),
@@ -55,5 +57,19 @@ export async function writeEnv(cfg) {
     `DB_PASSWORD=${cfg.DB_PASSWORD}`
   ];
   await fs.appendFile('.env', '\n' + lines.join('\n') + '\n');
+}
+
+async function ensureDatabase(cfg) {
+  const connection = await mysql.createConnection({
+    host: cfg.DB_HOST,
+    port: Number(cfg.DB_PORT || 3306),
+    user: cfg.DB_USERNAME,
+    password: cfg.DB_PASSWORD
+  });
+  try {
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${cfg.DB_DATABASE}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;`);
+  } finally {
+    await connection.end();
+  }
 }
 
