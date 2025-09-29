@@ -1,25 +1,50 @@
-import mysql from 'mysql2/promise';
+import { Sequelize, DataTypes } from 'sequelize';
+import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
 
-let pool = null;
+let sequelize = null;
+let User = null;
 
 export async function configureDb(cfg) {
-  pool = mysql.createPool({
+  sequelize = new Sequelize(cfg.DB_DATABASE, cfg.DB_USERNAME, cfg.DB_PASSWORD, {
     host: cfg.DB_HOST,
-    user: cfg.DB_USERNAME,
-    password: cfg.DB_PASSWORD,
     port: Number(cfg.DB_PORT || 3306),
-    database: cfg.DB_DATABASE,
-    waitForConnections: true,
-    connectionLimit: 10
+    dialect: 'mysql',
+    logging: false
   });
+
+  User = sequelize.define('User', {
+    id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+    name: { type: DataTypes.STRING(255), allowNull: false },
+    email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
+    password: { type: DataTypes.STRING(255), allowNull: false },
+    email_verified_at: { type: DataTypes.DATE, allowNull: true },
+    system_reserve: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
+  }, { tableName: 'users', timestamps: true });
 }
 
-export async function connectDb() { if (!pool) throw new Error('DB not configured'); await pool.getConnection().then(c=>c.release()); }
+export async function connectDb() {
+  if (!sequelize) throw new Error('DB not configured');
+  await sequelize.authenticate();
+}
 
-export async function runMigrations(importData) { /* No-op in generic port */ }
+export async function runMigrations() {
+  if (!sequelize) throw new Error('DB not configured');
+  await sequelize.sync();
+}
 
-export async function seedIfNeeded() { /* No-op */ }
+export async function createOrUpdateAdmin(admin) {
+  if (!User) throw new Error('Models not initialized');
+  const name = `${admin.first_name} ${admin.last_name}`.trim();
+  const email = admin.email;
+  const password = await bcrypt.hash(admin.password, 10);
+  const existing = await User.findOne({ where: { email } });
+  if (existing) {
+    await existing.update({ name, password, email_verified_at: new Date(), system_reserve: true });
+    return existing;
+  }
+  return await User.create({ name, email, password, email_verified_at: new Date(), system_reserve: true });
+}
 
 export async function writeEnv(cfg) {
   const lines = [

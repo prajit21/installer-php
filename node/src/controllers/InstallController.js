@@ -5,7 +5,7 @@ import { validationResult, body } from 'express-validator';
 import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
 import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
 import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } from '../validators/index.js';
-import { configureDb, connectDb, runMigrations, seedIfNeeded, writeEnv } from '../lib/db.js';
+import { configureDb, connectDb, runMigrations, writeEnv, createOrUpdateAdmin } from '../lib/db.js';
 
 export async function getRequirements(req, res) {
   await ensureInstallAssets();
@@ -72,11 +72,8 @@ export async function getDatabase(req, res) {
 export const postDatabaseConfig = [
   async (req, res, next) => {
     try {
-      const shouldValidateAdmin = process.env.SPATIE_ENABLED === 'true' && !('is_import_data' in req.body);
-      if (shouldValidateAdmin) {
-        const validators = getAdminValidators();
-        for (const v of validators) { await v.run(req); }
-      }
+      const validators = getAdminValidators();
+      for (const v of validators) { await v.run(req); }
       return next();
     } catch (e) { return next(e); }
   },
@@ -87,8 +84,8 @@ export const postDatabaseConfig = [
     const { database, admin, is_import_data } = req.body;
     await configureDb(database);
     await connectDb(database);
-    await runMigrations(is_import_data);
-    if (!is_import_data && process.env.SPATIE_ENABLED === 'true' && admin) { /* no-op placeholder for roles */ }
+    await runMigrations();
+    if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
     if (is_import_data) {
       const dump = publicPath('db.sql');
       if (await fs.pathExists(dump)) { /* Loading SQL is out-of-scope for generic port */ }
