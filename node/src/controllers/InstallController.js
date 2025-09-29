@@ -50,6 +50,7 @@ export const postLicense = [
       const ipPath = publicPath('cj7kl89.tmp');
       const serverIp = req.socket?.localAddress || req.ip || '';
       await fs.writeFile(ipPath, Buffer.from(serverIp).toString('base64'));
+      req.session.licenseVerified = true;
       return res.redirect('/install/database');
     }
     req.session._errors = { license: (resp?.data?.message) || 'Verification failed' };

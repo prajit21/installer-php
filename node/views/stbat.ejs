@@ -79,7 +79,9 @@
     </div>
   </form>
   <div class="next-btn d-flex">
-    <a href="/install/license" class="btn btn-primary" id="previousBtn"><i class="far fa-hand-point-left me-2"></i>Previous</a>
+    <% if (!session.licenseVerified) { %>
+      <a href="/install/license" class="btn btn-primary" id="previousBtn"><i class="far fa-hand-point-left me-2"></i>Previous</a>
+    <% } %>
     <a href="javascript:void(0)" id="submitBtn" class="btn btn-primary submit-form">Next<i class="far fa-hand-point-right ms-2"></i><span id="spinnerIcon" class="spinner-border spinner-border-sm ms-2 d-none"></span></a>
   </div>
 </div>
