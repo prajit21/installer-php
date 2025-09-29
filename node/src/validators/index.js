@@ -18,9 +18,28 @@ export const validateLicenseWithAdminBody = [
 ];
 
 export const validateDbBody = [
-  body('database.DB_HOST').notEmpty().withMessage('Host is required').matches(/^\S+$/),
-  body('database.DB_PORT').notEmpty().withMessage('Port is required').matches(/^\S+$/),
-  body('database.DB_USERNAME').notEmpty().withMessage('Username is required').matches(/^\S+$/),
-  body('database.DB_DATABASE').notEmpty().withMessage('Database is required').matches(/^\S+$/)
+  body('database.DB_HOST').notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
+  body('database.DB_PORT').notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
+  body('database.DB_USERNAME').notEmpty().withMessage('Username is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in username'),
+  body('database.DB_DATABASE').notEmpty().withMessage('Database is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in database name')
 ];
+
+export function getDbValidators() {
+  return [
+    body('database.DB_HOST').notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
+    body('database.DB_PORT').notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
+    body('database.DB_USERNAME').notEmpty().withMessage('Username is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in username'),
+    body('database.DB_DATABASE').notEmpty().withMessage('Database is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in database name')
+  ];
+}
+
+export function getAdminValidators() {
+  return [
+    body('admin.first_name').notEmpty().withMessage('first name is required'),
+    body('admin.last_name').notEmpty().withMessage('last name is required'),
+    body('admin.email').notEmpty().withMessage('email is required').bail().isEmail().withMessage('email must be valid'),
+    body('admin.password').notEmpty().withMessage('password is required').bail().isLength({ min: 8 }).withMessage('password must be at least 8 characters'),
+    body('admin.password_confirmation').notEmpty().withMessage('password confirmation is required').bail().custom((v, { req }) => v === req.body?.admin?.password).withMessage('Passwords must match')
+  ];
+}
 

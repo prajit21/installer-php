@@ -9,18 +9,21 @@
           <label>Host <span class="required-fill">*</span></label>
           <div>
             <input type="text" name="database[DB_HOST]" value="127.0.0.1" class="form-control" placeholder="127.0.0.1" autocomplete="off">
+            <% if (errors['database.DB_HOST']) { %><span class="text-danger"><%= errors['database.DB_HOST'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Port<span class="required-fill">*</span></label>
           <div>
             <input type="number" name="database[DB_PORT]" value="3306" class="form-control" placeholder="3306" autocomplete="off">
+            <% if (errors['database.DB_PORT']) { %><span class="text-danger"><%= errors['database.DB_PORT'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>DB Username<span class="required-fill">*</span></label>
           <div>
             <input type="text" name="database[DB_USERNAME]" value="" class="form-control" autocomplete="off">
+            <% if (errors['database.DB_USERNAME']) { %><span class="text-danger"><%= errors['database.DB_USERNAME'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
@@ -33,6 +36,7 @@
           <label>Database Name<span class="required-fill">*</span></label>
           <div>
             <input type="text" name="database[DB_DATABASE]" value="" class="form-control" autocomplete="off">
+            <% if (errors['database.DB_DATABASE']) { %><span class="text-danger"><%= errors['database.DB_DATABASE'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row form-check">
@@ -48,30 +52,35 @@
           <label>First Name <span class="required-fill">*</span></label>
           <div>
             <input type="text" name="admin[first_name]" value="" class="form-control" autocomplete="off">
+            <% if (errors['admin.first_name']) { %><span class="text-danger"><%= errors['admin.first_name'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Last Name<span class="required-fill">*</span></label>
           <div>
             <input type="text" name="admin[last_name]" value="" class="form-control" autocomplete="off">
+            <% if (errors['admin.last_name']) { %><span class="text-danger"><%= errors['admin.last_name'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Email<span class="required-fill">*</span></label>
           <div>
             <input type="email" name="admin[email]" value="" class="form-control" autocomplete="off">
+            <% if (errors['admin.email']) { %><span class="text-danger"><%= errors['admin.email'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Password<span class="required-fill">*</span></label>
           <div>
             <input type="password" name="admin[password]" class="form-control" autocomplete="off">
+            <% if (errors['admin.password']) { %><span class="text-danger"><%= errors['admin.password'] %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Confirm Password <span class="required-fill">*</span></label>
           <div>
             <input type="password" name="admin[password_confirmation]" class="form-control" autocomplete="off">
+            <% if (errors['admin.password_confirmation']) { %><span class="text-danger"><%= errors['admin.password_confirmation'] %></span><% } %>
           </div>
         </div>
       </div>

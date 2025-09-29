@@ -4,7 +4,7 @@ import axios from 'axios';
 import { validationResult, body } from 'express-validator';
 import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
 import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
-import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody } from '../validators/index.js';
+import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } from '../validators/index.js';
 import { configureDb, connectDb, runMigrations, seedIfNeeded, writeEnv } from '../lib/db.js';
 
 export async function getRequirements(req, res) {
@@ -70,6 +70,16 @@ export async function getDatabase(req, res) {
 }
 
 export const postDatabaseConfig = [
+  async (req, res, next) => {
+    try {
+      const shouldValidateAdmin = process.env.SPATIE_ENABLED === 'true' && !('is_import_data' in req.body);
+      if (shouldValidateAdmin) {
+        const validators = getAdminValidators();
+        for (const v of validators) { await v.run(req); }
+      }
+      return next();
+    } catch (e) { return next(e); }
+  },
   ...validateDbBody,
   async (req, res) => {
     const errors = validationResult(req);
