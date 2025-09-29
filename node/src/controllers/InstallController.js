@@ -34,7 +34,7 @@ export const postLicense = [
     if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { license, envato_username } = req.body;
     const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
-      key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: "TU8xRVFaVjlRTA==", server_ip: req.ip
+      key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip
     }).catch(e => e.response);
     if (resp && resp.status === 200) {
       const pubDir = path.join(basePath(), 'public');

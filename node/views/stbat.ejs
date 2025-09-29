@@ -1,4 +1,4 @@
-<% layout('layouts/stms', { title: 'Database' }) %>
+<% layout('layouts/stmv', { title: 'Database' }) %>
 <div class="wizard-step-3 d-block">
   <form action="/install/database" method="POST">
     <div class="row">
@@ -39,13 +39,7 @@
             <% if (errors['database.DB_DATABASE']) { %><span class="text-danger"><%= errors['database.DB_DATABASE'] %></span><% } %>
           </div>
         </div>
-        <div class="form-group form-row form-check">
-          <input class="form-check-input" name="is_import_data" type="checkbox" value="1" id="importDummyData">
-          <label class="form-check-label" for="is_import_data">Import Dummy Data</label>
-        </div>
       </div>
-      <% } %>
-      <% if (true) { %>
       <div class="database-field col-md" id="adminFormGroup">
         <h6>Please enter your administration details below.</h6>
         <div class="form-group form-row">
