@@ -82,10 +82,17 @@ export const postDatabaseConfig = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { database, admin, is_import_data } = req.body;
-    await configureDb(database);
-    await connectDb(database);
-    await runMigrations();
-    if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
+    try {
+      await configureDb(database);
+      await connectDb(database);
+      await runMigrations();
+      if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
+    } catch (e) {
+      const dbFieldErrors = mapDbConnectionError(e);
+      req.session._errors = dbFieldErrors;
+      req.session._old = req.body;
+      return res.redirect('back');
+    }
     if (is_import_data) {
       const dump = publicPath('db.sql');
       if (await fs.pathExists(dump)) { /* Loading SQL is out-of-scope for generic port */ }
@@ -143,6 +150,33 @@ function mapErrors(result, firstOnly = false) {
   const out = {};
   const arr = firstOnly ? result.array({ onlyFirstError: true }) : result.array();
   for (const e of arr) out[e.path] = e.msg;
+  return out;
+}
+
+function mapDbConnectionError(err) {
+  const out = {};
+  const code = err?.parent?.code || err?.original?.code || err?.code || '';
+  const message = (err?.message || err?.parent?.sqlMessage || '').toString();
+  if (message.match(/Access denied/i) || /ER_ACCESS_DENIED_ERROR/.test(code)) {
+    out['database.DB_USERNAME'] = 'Access denied: invalid username or password';
+    out['database.DB_PASSWORD'] = 'Access denied: invalid username or password';
+    return out;
+  }
+  if (message.match(/Unknown database/i) || /ER_BAD_DB_ERROR/.test(code)) {
+    out['database.DB_DATABASE'] = 'Unknown database or insufficient privileges';
+    return out;
+  }
+  if (/ENOTFOUND|EAI_AGAIN/i.test(code) || message.match(/getaddrinfo|not known/i)) {
+    out['database.DB_HOST'] = 'Unable to resolve host';
+    return out;
+  }
+  if (/ECONNREFUSED|EHOSTUNREACH|ETIMEDOUT/i.test(code) || message.match(/connect ECONNREFUSED|timeout/i)) {
+    out['database.DB_HOST'] = 'Connection refused/unreachable';
+    out['database.DB_PORT'] = 'Check port and firewall';
+    return out;
+  }
+  // Default generic mapping
+  out['database.DB_HOST'] = message || 'Database connection error';
   return out;
 }
 
