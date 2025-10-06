@@ -18,5 +18,9 @@
 .media-body h5 { margin: 0 0 5px; font-size: 16px; font-weight: 500; }
 .media-body h6 { margin: 0; font-size: 14px; color: #6c757d; font-weight: 400; }
 .wizard-form-details { min-height: 300px; }
+.form-group { margin-bottom: 1rem; }
+.form-control.is-invalid { border-color: #dc3545; padding-right: calc(1.5em + .75rem); background-repeat: no-repeat; background-position: right calc(.375em + .1875rem) center; background-size: calc(.75em + .375rem) calc(.75em + .375rem); }
+.invalid-feedback { display: block; color: #dc3545; font-size: 0.875rem; margin-top: .25rem; }
+.required-fill { color: #dc3545; margin-left: 2px; }
 .btn-group { display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px; }
 @media (max-width: 768px) { .wizard-container { margin: 10px; } .wizard-header { padding: 20px; } .wizard-step-container { padding: 20px; } .step-container { flex-direction: column; } .step-container li:not(:last-child)::after { display: none; } .form-row { flex-direction: column; } .btn-group { flex-direction: column; } }

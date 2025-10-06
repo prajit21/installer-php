@@ -8,15 +8,15 @@
         <div class="form-group form-row mb-3">
           <label>Envato Username<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="envato_username" value="<%= getOld('envato_username','') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors.envato_username) { %><span class="text-danger"><%= fieldErrors.envato_username %></span><% } %>
+            <input type="text" name="envato_username" value="<%= getOld('envato_username','') %>" class="form-control <%= fieldErrors.envato_username ? 'is-invalid' : '' %>" autocomplete="off" required>
+            <% if (fieldErrors.envato_username) { %><div class="invalid-feedback"><%= fieldErrors.envato_username %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row mb-3">
           <label class="col-lg-3">Envato Purchase Code<span class="required-fill">*</span></label>
           <div class="col-lg">
-            <input type="text" name="license" value="<%= getOld('license','') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors.license) { %><span class="text-danger"><%= fieldErrors.license %></span><% } %>
+            <input type="text" name="license" value="<%= getOld('license','') %>" class="form-control <%= fieldErrors.license ? 'is-invalid' : '' %>" autocomplete="off" required>
+            <% if (fieldErrors.license) { %><div class="invalid-feedback"><%= fieldErrors.license %></div><% } %>
           </div>
         </div>
       </div>

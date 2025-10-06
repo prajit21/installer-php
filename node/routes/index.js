@@ -1,7 +1,11 @@
-const { Router } = require('express');
+const { Router, urlencoded, json } = require('express');
 const InstallController = require('../src/controllers/InstallController.js');
 
 const router = Router();
+
+// Ensure request bodies for this router support nested fields
+router.use(json());
+router.use(urlencoded({ extended: true }));
 
 // Ensure required view locals exist even when host app doesn't provide them
 router.use((req, res, next) => {

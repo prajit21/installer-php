@@ -8,22 +8,22 @@
         <div class="form-group form-row">
           <label>Host <span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="database[DB_HOST]" value="<%= getOld('database.DB_HOST', process.env.DB_HOST || '127.0.0.1') %>" class="form-control" placeholder="127.0.0.1" autocomplete="off">
-            <% if (fieldErrors['database.DB_HOST']) { %><span class="text-danger"><%= fieldErrors['database.DB_HOST'] %></span><% } %>
+            <input type="text" name="database[DB_HOST]" value="<%= getOld('database.DB_HOST', process.env.DB_HOST || '127.0.0.1') %>" class="form-control <%= fieldErrors['database.DB_HOST'] ? 'is-invalid' : '' %>" placeholder="127.0.0.1" autocomplete="off">
+            <% if (fieldErrors['database.DB_HOST']) { %><div class="invalid-feedback"><%= fieldErrors['database.DB_HOST'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Port<span class="required-fill">*</span></label>
           <div>
-            <input type="number" name="database[DB_PORT]" value="<%= getOld('database.DB_PORT', process.env.DB_PORT || '3306') %>" class="form-control" placeholder="3306" autocomplete="off">
-            <% if (fieldErrors['database.DB_PORT']) { %><span class="text-danger"><%= fieldErrors['database.DB_PORT'] %></span><% } %>
+            <input type="number" name="database[DB_PORT]" value="<%= getOld('database.DB_PORT', process.env.DB_PORT || '3306') %>" class="form-control <%= fieldErrors['database.DB_PORT'] ? 'is-invalid' : '' %>" placeholder="3306" autocomplete="off">
+            <% if (fieldErrors['database.DB_PORT']) { %><div class="invalid-feedback"><%= fieldErrors['database.DB_PORT'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>DB Username<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="database[DB_USERNAME]" value="<%= getOld('database.DB_USERNAME', process.env.DB_USERNAME || '') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors['database.DB_USERNAME']) { %><span class="text-danger"><%= fieldErrors['database.DB_USERNAME'] %></span><% } %>
+            <input type="text" name="database[DB_USERNAME]" value="<%= getOld('database.DB_USERNAME', process.env.DB_USERNAME || '') %>" class="form-control <%= fieldErrors['database.DB_USERNAME'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['database.DB_USERNAME']) { %><div class="invalid-feedback"><%= fieldErrors['database.DB_USERNAME'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
@@ -35,8 +35,8 @@
         <div class="form-group form-row">
           <label>Database Name<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="database[DB_DATABASE]" value="<%= getOld('database.DB_DATABASE', process.env.DB_DATABASE || '') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors['database.DB_DATABASE']) { %><span class="text-danger"><%= fieldErrors['database.DB_DATABASE'] %></span><% } %>
+            <input type="text" name="database[DB_DATABASE]" value="<%= getOld('database.DB_DATABASE', process.env.DB_DATABASE || '') %>" class="form-control <%= fieldErrors['database.DB_DATABASE'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['database.DB_DATABASE']) { %><div class="invalid-feedback"><%= fieldErrors['database.DB_DATABASE'] %></div><% } %>
           </div>
         </div>
       </div>
@@ -49,36 +49,36 @@
         <div class="form-group form-row">
           <label>First Name <span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="admin[first_name]" value="<%= getOld('admin.first_name','') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors['admin.first_name']) { %><span class="text-danger"><%= fieldErrors['admin.first_name'] %></span><% } %>
+            <input type="text" name="admin[first_name]" value="<%= getOld('admin.first_name','') %>" class="form-control <%= fieldErrors['admin.first_name'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['admin.first_name']) { %><div class="invalid-feedback"><%= fieldErrors['admin.first_name'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Last Name<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="admin[last_name]" value="<%= getOld('admin.last_name','') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors['admin.last_name']) { %><span class="text-danger"><%= fieldErrors['admin.last_name'] %></span><% } %>
+            <input type="text" name="admin[last_name]" value="<%= getOld('admin.last_name','') %>" class="form-control <%= fieldErrors['admin.last_name'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['admin.last_name']) { %><div class="invalid-feedback"><%= fieldErrors['admin.last_name'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Email<span class="required-fill">*</span></label>
           <div>
-            <input type="email" name="admin[email]" value="<%= getOld('admin.email','') %>" class="form-control" autocomplete="off">
-            <% if (fieldErrors['admin.email']) { %><span class="text-danger"><%= fieldErrors['admin.email'] %></span><% } %>
+            <input type="email" name="admin[email]" value="<%= getOld('admin.email','') %>" class="form-control <%= fieldErrors['admin.email'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['admin.email']) { %><div class="invalid-feedback"><%= fieldErrors['admin.email'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Password<span class="required-fill">*</span></label>
           <div>
-            <input type="password" name="admin[password]" class="form-control" autocomplete="off">
-            <% if (fieldErrors['admin.password']) { %><span class="text-danger"><%= fieldErrors['admin.password'] %></span><% } %>
+            <input type="password" name="admin[password]" class="form-control <%= fieldErrors['admin.password'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['admin.password']) { %><div class="invalid-feedback"><%= fieldErrors['admin.password'] %></div><% } %>
           </div>
         </div>
         <div class="form-group form-row">
           <label>Confirm Password <span class="required-fill">*</span></label>
           <div>
-            <input type="password" name="admin[password_confirmation]" class="form-control" autocomplete="off">
-            <% if (fieldErrors['admin.password_confirmation']) { %><span class="text-danger"><%= fieldErrors['admin.password_confirmation'] %></span><% } %>
+            <input type="password" name="admin[password_confirmation]" class="form-control <%= fieldErrors['admin.password_confirmation'] ? 'is-invalid' : '' %>" autocomplete="off">
+            <% if (fieldErrors['admin.password_confirmation']) { %><div class="invalid-feedback"><%= fieldErrors['admin.password_confirmation'] %></div><% } %>
           </div>
         </div>
       </div>
