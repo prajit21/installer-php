@@ -24,6 +24,12 @@ export async function getLicense(req, res) {
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('database');
+  
+  // Skip license verification if SKIP_LICENSE is set to true
+  if (process.env.SKIP_LICENSE === 'true') {
+    return res.redirect('database');
+  }
+  
   res.render('stlic', { title: 'License' });
 }
 
@@ -61,7 +67,12 @@ export const postLicense = [
 export async function getDatabase(req, res) {
   if (!(await getConfigured())) return res.redirect('requirements');
   if (!(await getDirsConfigured())) return res.redirect('directories');
-  if (!(await liSync())) return res.redirect('license');
+  
+  // Skip license check if SKIP_LICENSE is set to true
+  if (process.env.SKIP_LICENSE !== 'true' && !(await liSync())) {
+    return res.redirect('license');
+  }
+  
   if (await datSync()) {
     if (!(await migSync())) await fs.writeFile(publicPath('_migZip.xml'), '');
     return res.redirect('completed');

@@ -8,7 +8,11 @@ import express from 'express';
 import path from 'path';
 import ejsMate from 'ejs-mate';
 import session from 'express-session';
+import dotenv from 'dotenv';
 import { InstallWizard, checkUserModelCompatibility } from './index.js';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 

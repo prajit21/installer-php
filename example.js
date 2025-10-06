@@ -7,8 +7,12 @@ import express from 'express';
 import path from 'path';
 import ejsMate from 'ejs-mate';
 import session from 'express-session';
+import dotenv from 'dotenv';
 import { InstallWizard, syncUserModel, checkUserModelCompatibility } from './index.js';
 import { Sequelize } from 'sequelize';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
