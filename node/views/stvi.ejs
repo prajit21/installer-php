@@ -1,4 +1,5 @@
 <% layout('layouts/stms', { title: 'Verify' }) %>
+<% var errors = (typeof errors === 'object' && errors) || {}; var old = (typeof old === 'function') ? old : function(key, fallback){ return (typeof fallback !== 'undefined') ? fallback : ''; }; %>
 <div>
   <form action="/install/verify" method="POST">
     <div class="row">

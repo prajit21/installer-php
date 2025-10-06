@@ -1,10 +1,10 @@
-<% if (session.success) { %>
+<% if (typeof session !== 'undefined' && session && session.success) { %>
   <p class="alert alert-success"><%= session.success %></p>
 <% } %>
-<% if (session.error) { %>
+<% if (typeof session !== 'undefined' && session && session.error) { %>
   <p class="alert alert-danger"><%= session.error %></p>
 <% } %>
-<% if (session.warning) { %>
+<% if (typeof session !== 'undefined' && session && session.warning) { %>
   <p class="alert alert-warning"><%= session.warning %></p>
 <% } %>
 

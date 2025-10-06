@@ -1,4 +1,5 @@
 <% layout('layouts/stmv', { title: 'License' }) %>
+<% var errors = (typeof errors === 'object' && errors) || {}; var old = (typeof old === 'function') ? old : function(key, fallback){ return (typeof fallback !== 'undefined') ? fallback : ''; }; %>
 <div class="wizard-step-3 d-block">
   <form action="/install/license" method="POST">
     <div class="row">

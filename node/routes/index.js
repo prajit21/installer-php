@@ -3,6 +3,51 @@ const InstallController = require('../src/controllers/InstallController.js');
 
 const router = Router();
 
+// Ensure required view locals exist even when host app doesn't provide them
+router.use((req, res, next) => {
+  // session (optional)
+  res.locals.session = req.session || res.locals.session || {};
+
+  // errors map
+  if (typeof res.locals.errors !== 'object' || res.locals.errors === null) {
+    res.locals.errors = Object.assign({}, (req.session && req.session._errors) || {});
+  }
+
+  // old() helper for repopulating forms
+  if (typeof res.locals.old !== 'function') {
+    const oldSnapshot = Object.assign({}, (req.session && req.session._old) || {});
+    res.locals.old = (key, fallback = '') => {
+      if (!key) return fallback;
+      const parts = String(key).split('.');
+      let current = oldSnapshot;
+      for (const part of parts) {
+        if (current && Object.prototype.hasOwnProperty.call(current, part)) {
+          current = current[part];
+        } else {
+          return fallback;
+        }
+      }
+      return current ?? fallback;
+    };
+  }
+
+  // routeIs helper used by layouts
+  if (typeof res.locals.routeIs !== 'function') {
+    res.locals.routeIs = (name) => {
+      const current = req.app.locals.currentRouteName || '';
+      return current === name;
+    };
+  }
+
+  // Reset one-time snapshots if session is present
+  if (req.session) {
+    req.session._old = {};
+    req.session._errors = {};
+  }
+
+  next();
+});
+
 const setRouteName = (name) => (req, res, next) => { 
   req.app.locals.currentRouteName = name; 
   next(); 
