@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installation Complete</title>
+  <link rel="icon" href="/favicon.png" type="image/x-icon">
+  <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Rubik:400,400i,500,500i,700,700i" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Embedded CSS for self-contained installation wizard -->
+  <style>
+    /* Bootstrap-like base styles */
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Roboto', sans-serif; background: #f8f9fa; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+    .row { display: flex; flex-wrap: wrap; margin: 0 -15px; }
+    .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0 15px; }
+    
+    /* Installation wizard specific styles */
+    .page-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .wizard-bg { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); width: 100%; min-height: 100vh; }
+    .wizard-container { background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; max-width: 600px; width: 100%; margin: 20px; }
+    
+    .wizard-header { background: #28a745; color: white; padding: 40px; text-align: center; }
+    .wizard-header h1 { margin: 0; font-size: 32px; font-weight: 300; }
+    .wizard-header p { margin: 15px 0 0; opacity: 0.9; font-size: 16px; }
+    
+    .wizard-content { padding: 40px; text-align: center; }
+    
+    .success-icon { width: 80px; height: 80px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; color: white; font-size: 36px; }
+    
+    .btn { display: inline-block; padding: 12px 24px; border: none; border-radius: 5px; font-size: 14px; font-weight: 500; text-align: center; text-decoration: none; cursor: pointer; transition: all 0.3s; margin: 10px; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-primary:hover { background: #0056b3; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-success:hover { background: #1e7e34; }
+    
+    .alert { padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 5px; }
+    .alert-success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    .alert-info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+    
+    .btn-group { margin-top: 30px; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .wizard-container { margin: 10px; }
+      .wizard-header { padding: 30px 20px; }
+      .wizard-content { padding: 30px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="wizard-bg">
+      <div class="container">
+        <div class="wizard-container">
+          <div class="wizard-header">
+            <h1>Installation Complete!</h1>
+            <p>Your application has been successfully installed</p>
+          </div>
+          <div class="wizard-content">
+            <div class="success-icon">
+              <i class="fas fa-check"></i>
+            </div>
+            <%- include('../partials/sts') %>
+            <%- body %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%- include('../partials/install-scripts') %>
+</body>
+</html>
