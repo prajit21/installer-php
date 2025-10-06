@@ -130,8 +130,9 @@ const postDatabaseConfig = [
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) { 
-      req.session._errors = mapErrors(errors, true); 
-      req.session._old = req.body; 
+      // Do not wipe previous errors/old here; merge to avoid race overwrites
+      req.session._errors = { ...(req.session._errors || {}), ...mapErrors(errors, true) }; 
+      req.session._old = { ...(req.session._old || {}), ...req.body }; 
       return res.redirect(getInstallBase(req) + '/database'); 
     }
     const { database, admin } = req.body;
@@ -150,8 +151,8 @@ const postDatabaseConfig = [
       if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
     } catch (e) {
       const dbFieldErrors = mapDbConnectionError(e);
-      req.session._errors = dbFieldErrors;
-      req.session._old = req.body;
+      req.session._errors = { ...(req.session._errors || {}), ...dbFieldErrors };
+      req.session._old = { ...(req.session._old || {}), ...req.body };
       return res.redirect(getInstallBase(req) + '/database');
     }
     if (is_import_data) {

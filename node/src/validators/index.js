@@ -35,11 +35,11 @@ function getDbValidators() {
 
 function getAdminValidators() {
   return [
-    body('admin.first_name').notEmpty().withMessage('first name is required'),
-    body('admin.last_name').notEmpty().withMessage('last name is required'),
-    body('admin.email').notEmpty().withMessage('email is required').bail().isEmail().withMessage('email must be valid'),
-    body('admin.password').notEmpty().withMessage('password is required').bail().isLength({ min: 8 }).withMessage('password must be at least 8 characters'),
-    body('admin.password_confirmation').notEmpty().withMessage('password confirmation is required').bail().custom((v, { req }) => v === req.body?.admin?.password).withMessage('Passwords must match')
+    body('admin.first_name').if((value, { req }) => !req.body.is_import_data).notEmpty().withMessage('first name is required'),
+    body('admin.last_name').if((value, { req }) => !req.body.is_import_data).notEmpty().withMessage('last name is required'),
+    body('admin.email').if((value, { req }) => !req.body.is_import_data).notEmpty().withMessage('email is required').bail().isEmail().withMessage('email must be valid'),
+    body('admin.password').if((value, { req }) => !req.body.is_import_data).notEmpty().withMessage('password is required').bail().isLength({ min: 8 }).withMessage('password must be at least 8 characters'),
+    body('admin.password_confirmation').if((value, { req }) => !req.body.is_import_data).notEmpty().withMessage('password confirmation is required').bail().custom((v, { req }) => v === req.body?.admin?.password).withMessage('Passwords must match')
   ];
 }
 
