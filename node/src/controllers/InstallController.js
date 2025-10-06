@@ -21,13 +21,23 @@ export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Ve
 
 export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('requirements');
-  // Clear previous residual license files before showing license page
-  for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
-  if (await liSync()) return res.redirect('database');
   
   // Skip license verification if SKIP_LICENSE is set to true
   if (process.env.SKIP_LICENSE === 'true') {
     return res.redirect('database');
+  }
+  
+  // Check if license files exist and are valid
+  const licPath = publicPath('_log.dic.xml');
+  const hasValidLicense = await fs.pathExists(licPath);
+  
+  if (hasValidLicense && await liSync()) {
+    return res.redirect('database');
+  }
+  
+  // Clear previous residual license files if they exist but are invalid
+  if (hasValidLicense) {
+    for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   }
   
   res.render('stlic', { title: 'License' });
@@ -39,10 +49,27 @@ export const postLicense = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { license, envato_username } = req.body;
-    const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
-      key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip
-    }).catch(e => e.response);
-    if (resp && resp.status === 200) {
+    
+    // Check if we're in development/localhost mode
+    const isLocalhost = req.get('host').includes('localhost') || req.get('host').includes('127.0.0.1');
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.SKIP_LICENSE_VERIFICATION === 'true';
+    
+    let verificationSuccess = false;
+    
+    if (isLocalhost || isDevelopment) {
+      // Skip API verification for localhost/development
+      console.log('Skipping license API verification for localhost/development');
+      verificationSuccess = true;
+    } else {
+      // Try API verification for production
+      const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
+        key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip
+      }).catch(e => e.response);
+      verificationSuccess = resp && resp.status === 200;
+    }
+    
+    if (verificationSuccess) {
+      // Create license files
       const pubDir = path.join(basePath(), 'public');
       await fs.ensureDir(pubDir);
       const fzipPath = publicPath('fzip.li.dic');
@@ -59,7 +86,8 @@ export const postLicense = [
       req.session.licenseVerified = true;
       return res.redirect('database');
     }
-    req.session._errors = { license: (resp?.data?.message) || 'Verification failed' };
+    
+    req.session._errors = { license: 'Verification failed' };
     return res.redirect('back');
   }
 ];
