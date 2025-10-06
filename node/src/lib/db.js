@@ -2,7 +2,7 @@ import { Sequelize, DataTypes } from 'sequelize';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
-import { UserModel, syncUserModel } from '../../lib/models.js';
+import { UserModel, syncUserModel } from '../../../lib/models.js';
 
 let sequelize = null;
 let User = null;
