@@ -15,15 +15,15 @@ export async function getRequirements(req, res) {
   res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
-export async function getDirectories(req, res) { return res.redirect('/install/requirements'); }
+export async function getDirectories(req, res) { return res.redirect('requirements'); }
 
 export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
 
 export async function getLicense(req, res) {
-  if (!(await getConfigured())) return res.redirect('/install/requirements');
+  if (!(await getConfigured())) return res.redirect('requirements');
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
-  if (await liSync()) return res.redirect('/install/database');
+  if (await liSync()) return res.redirect('database');
   res.render('stlic', { title: 'License' });
 }
 
@@ -51,7 +51,7 @@ export const postLicense = [
       const serverIp = req.socket?.localAddress || req.ip || '';
       await fs.writeFile(ipPath, Buffer.from(serverIp).toString('base64'));
       req.session.licenseVerified = true;
-      return res.redirect('/install/database');
+      return res.redirect('database');
     }
     req.session._errors = { license: (resp?.data?.message) || 'Verification failed' };
     return res.redirect('back');
@@ -59,12 +59,12 @@ export const postLicense = [
 ];
 
 export async function getDatabase(req, res) {
-  if (!(await getConfigured())) return res.redirect('/install/requirements');
-  if (!(await getDirsConfigured())) return res.redirect('/install/directories');
-  if (!(await liSync())) return res.redirect('/install/license');
+  if (!(await getConfigured())) return res.redirect('requirements');
+  if (!(await getDirsConfigured())) return res.redirect('directories');
+  if (!(await liSync())) return res.redirect('license');
   if (await datSync()) {
     if (!(await migSync())) await fs.writeFile(publicPath('_migZip.xml'), '');
-    return res.redirect('/install/completed');
+    return res.redirect('completed');
   }
   res.render('stbat', { title: 'Database' });
 }
@@ -106,12 +106,12 @@ export const postDatabaseConfig = [
     }
     await fs.writeFile(publicPath('_migZip.xml'), '');
     if (process.env.DOTENV_EDIT === 'true') await writeEnv(database);
-    return res.redirect('/install/completed');
+    return res.redirect('completed');
   }
 ];
 
 export async function getCompleted(req, res) {
-  if (!(await migSync())) return res.redirect('/install/database');
+  if (!(await migSync())) return res.redirect('database');
   const instFile = publicPath('installation.json');
   if (!(await fs.pathExists(instFile))) await fs.writeFile(instFile, '');
   res.render('co', { title: 'Installation Completed' });

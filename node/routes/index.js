@@ -13,15 +13,16 @@ router.get('/erase/:project_id', setRouteName('install.erase'), InstallControlle
 router.post('/block/license/verify', setRouteName('install.unblock'), ...[].concat(InstallController.postUnblockVerify));
 router.get('/block', setRouteName('install.block.setup'), InstallController.getBlockSetup);
 
+// Main installation routes (when mounted at /install, these become /install/, /install/requirements, etc.)
 router.get('/', setRouteName('install.requirements'), InstallController.getRequirements);
-router.get('/install/requirements', setRouteName('install.requirements'), InstallController.getRequirements);
-router.get('/install/directories', setRouteName('install.directories'), InstallController.getDirectories);
-router.get('/install/database', setRouteName('install.database'), InstallController.getDatabase);
-router.get('/install/verify', setRouteName('install.verify.setup'), InstallController.getVerifySetup);
-router.post('/install/verify', setRouteName('install.verify'), ...(InstallController.postVerify || []));
-router.get('/install/license', setRouteName('install.license'), InstallController.getLicense);
-router.post('/install/license', setRouteName('install.license.setup'), ...[].concat(InstallController.postLicense));
-router.post('/install/database', setRouteName('install.database.config'), ...[].concat(InstallController.postDatabaseConfig));
-router.get('/install/completed', setRouteName('install.completed'), InstallController.getCompleted);
+router.get('/requirements', setRouteName('install.requirements'), InstallController.getRequirements);
+router.get('/directories', setRouteName('install.directories'), InstallController.getDirectories);
+router.get('/database', setRouteName('install.database'), InstallController.getDatabase);
+router.get('/verify', setRouteName('install.verify.setup'), InstallController.getVerifySetup);
+router.post('/verify', setRouteName('install.verify'), ...(InstallController.postVerify || []));
+router.get('/license', setRouteName('install.license'), InstallController.getLicense);
+router.post('/license', setRouteName('install.license.setup'), ...[].concat(InstallController.postLicense));
+router.post('/database', setRouteName('install.database.config'), ...[].concat(InstallController.postDatabaseConfig));
+router.get('/completed', setRouteName('install.completed'), InstallController.getCompleted);
 
 export default router;
