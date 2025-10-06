@@ -134,7 +134,9 @@ const postDatabaseConfig = [
       req.session._old = req.body; 
       return res.redirect(getInstallBase(req) + '/database'); 
     }
-    const { database, admin, is_import_data } = req.body;
+    const { database, admin } = req.body;
+    // Treat any truthy value as checked for import flag
+    const is_import_data = !!(req.body.is_import_data);
     try {
       // Get existing user model from the installation wizard if available
       let userModel = null;
