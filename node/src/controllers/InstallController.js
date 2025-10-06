@@ -7,6 +7,12 @@ const { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSyn
 const { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } = require('../validators/index.js');
 const { configureDb, connectDb, runMigrations, writeEnv, createOrUpdateAdmin } = require('../lib/db.js');
 
+function getInstallBase(req) {
+  const base = (req.baseUrl && req.baseUrl.trim()) || '';
+  // If base is empty, default to the standard mount path
+  return base || '/install';
+}
+
 async function getRequirements(req, res) {
   await ensureInstallAssets();
   const c = getC();
@@ -47,7 +53,11 @@ const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { 
+      req.session._errors = mapErrors(errors, true); 
+      req.session._old = req.body; 
+      return res.redirect(getInstallBase(req) + '/license'); 
+    }
     const { license, envato_username } = req.body;
     
     // Check if we're in development/localhost mode
@@ -88,7 +98,7 @@ const postLicense = [
     }
     
     req.session._errors = { license: 'Verification failed' };
-    return res.redirect('back');
+    return res.redirect(getInstallBase(req) + '/license');
   }
 ];
 
@@ -119,8 +129,15 @@ const postDatabaseConfig = [
   ...validateDbBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
-    const { database, admin, is_import_data } = req.body;
+    if (!errors.isEmpty()) { 
+      // Do not wipe previous errors/old here; merge to avoid race overwrites
+      req.session._errors = { ...(req.session._errors || {}), ...mapErrors(errors, true) }; 
+      req.session._old = { ...(req.session._old || {}), ...req.body }; 
+      return res.redirect(getInstallBase(req) + '/database'); 
+    }
+    const { database = {}, admin = {} } = req.body;
+    // Treat any truthy value as checked for import flag
+    const is_import_data = !!(req.body.is_import_data);
     try {
       // Get existing user model from the installation wizard if available
       let userModel = null;
@@ -128,15 +145,24 @@ const postDatabaseConfig = [
         userModel = req.app.locals.installWizard.options.existingUserModel;
       }
       
-      await configureDb(database, userModel);
-      await connectDb(database);
+      // Normalize types and trim values
+      const normalizedDb = {
+        DB_HOST: String(database.DB_HOST || '').trim(),
+        DB_PORT: String(database.DB_PORT || '').trim(),
+        DB_USERNAME: String(database.DB_USERNAME || '').trim(),
+        DB_PASSWORD: String(database.DB_PASSWORD || ''),
+        DB_DATABASE: String(database.DB_DATABASE || '').trim()
+      };
+
+      await configureDb(normalizedDb, userModel);
+      await connectDb();
       await runMigrations();
-      if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
+      if (!is_import_data && admin && admin.email) { await createOrUpdateAdmin(admin); }
     } catch (e) {
       const dbFieldErrors = mapDbConnectionError(e);
-      req.session._errors = dbFieldErrors;
-      req.session._old = req.body;
-      return res.redirect('back');
+      req.session._errors = { ...(req.session._errors || {}), ...dbFieldErrors };
+      req.session._old = { ...(req.session._old || {}), ...req.body };
+      return res.redirect(getInstallBase(req) + '/database');
     }
     if (is_import_data) {
       const dump = publicPath('db.sql');

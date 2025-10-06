@@ -1,6 +1,6 @@
 <% layout('layouts/stms', { title: 'Verify' }) %>
 <div>
-  <form action="/install/verify" method="POST">
+  <form action="<%= (typeof baseUrl !== 'undefined' ? baseUrl : '/install') %>/verify" method="POST">
     <div class="row">
       <div class="database-field col-md-12">
         <h6>Please verify license & enter your administration details below.</h6>

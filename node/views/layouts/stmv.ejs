@@ -69,6 +69,17 @@
   <script src="/install/js/bootstrap.min.js"></script>
   <script src="/install/js/feather-icon/feather.min.js"></script>
   <% if (typeof scripts !== 'undefined') { %><%- scripts %><% } %>
+  <script>
+    // guard: prevent double submit
+    (function(){
+      var submitting = false;
+      $(document).on('submit', 'form', function(){
+        if (submitting) return false;
+        submitting = true;
+        setTimeout(function(){ submitting = false; }, 2000);
+      });
+    })();
+  </script>
 </body>
 </html>
 
