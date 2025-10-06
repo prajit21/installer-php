@@ -2,11 +2,13 @@ import { Sequelize, DataTypes } from 'sequelize';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
+import { UserModel, syncUserModel } from '../../lib/models.js';
 
 let sequelize = null;
 let User = null;
+let hostUserModel = null;
 
-export async function configureDb(cfg) {
+export async function configureDb(cfg, existingUserModel = null) {
   await ensureDatabase(cfg);
   sequelize = new Sequelize(cfg.DB_DATABASE, cfg.DB_USERNAME, cfg.DB_PASSWORD, {
     host: cfg.DB_HOST,
@@ -15,14 +17,15 @@ export async function configureDb(cfg) {
     logging: false
   });
 
-  User = sequelize.define('User', {
-    id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-    name: { type: DataTypes.STRING(255), allowNull: false },
-    email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
-    password: { type: DataTypes.STRING(255), allowNull: false },
-    email_verified_at: { type: DataTypes.DATE, allowNull: true },
-    system_reserve: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
-  }, { tableName: 'users', timestamps: true });
+  // Use existing user model if provided, otherwise create new one
+  if (existingUserModel) {
+    const userModel = await syncUserModel(sequelize, existingUserModel);
+    User = userModel.getModel();
+    hostUserModel = existingUserModel;
+  } else {
+    const userModel = new UserModel(sequelize);
+    User = userModel.getModel();
+  }
 }
 
 export async function connectDb() {

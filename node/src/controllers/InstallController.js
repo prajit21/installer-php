@@ -81,9 +81,15 @@ export const postDatabaseConfig = [
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
-    const { database, admin, is_import_data } = req.body;
+    const { database, admin, is_import_data, existing_user_model } = req.body;
     try {
-      await configureDb(database);
+      // Check if there's an existing user model to sync with
+      let userModel = null;
+      if (existing_user_model && typeof existing_user_model === 'object') {
+        userModel = existing_user_model;
+      }
+      
+      await configureDb(database, userModel);
       await connectDb(database);
       await runMigrations();
       if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }

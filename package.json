@@ -1,10 +1,17 @@
 {
   "name": "bladelib-node",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
-  "description": "Express + EJS port of phpblaze/bladelib Laravel package",
-  "main": "app.js",
+  "description": "Express + EJS port of phpblaze/bladelib Laravel package - Installation wizard with user model sync",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./install": "./lib/install.js",
+    "./models": "./lib/models.js"
+  },
+  "keywords": ["express", "ejs", "installation", "wizard", "sequelize", "mysql", "admin", "user-management"],
+  "author": "Your Name",
+  "license": "MIT",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js"
