@@ -1,12 +1,14 @@
-import { Sequelize, DataTypes } from 'sequelize';
-import mysql from 'mysql2/promise';
-import bcrypt from 'bcryptjs';
-import fs from 'fs-extra';
+const { Sequelize, DataTypes } = require('sequelize');
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+const fs = require('fs-extra');
+const { UserModel, syncUserModel } = require('../../../lib/models.js');
 
 let sequelize = null;
 let User = null;
+let hostUserModel = null;
 
-export async function configureDb(cfg) {
+async function configureDb(cfg, existingUserModel = null) {
   await ensureDatabase(cfg);
   sequelize = new Sequelize(cfg.DB_DATABASE, cfg.DB_USERNAME, cfg.DB_PASSWORD, {
     host: cfg.DB_HOST,
@@ -15,27 +17,28 @@ export async function configureDb(cfg) {
     logging: false
   });
 
-  User = sequelize.define('User', {
-    id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
-    name: { type: DataTypes.STRING(255), allowNull: false },
-    email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
-    password: { type: DataTypes.STRING(255), allowNull: false },
-    email_verified_at: { type: DataTypes.DATE, allowNull: true },
-    system_reserve: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
-  }, { tableName: 'users', timestamps: true });
+  // Use existing user model if provided, otherwise create new one
+  if (existingUserModel) {
+    const userModel = await syncUserModel(sequelize, existingUserModel);
+    User = userModel.getModel();
+    hostUserModel = existingUserModel;
+  } else {
+    const userModel = new UserModel(sequelize);
+    User = userModel.getModel();
+  }
 }
 
-export async function connectDb() {
+async function connectDb() {
   if (!sequelize) throw new Error('DB not configured');
   await sequelize.authenticate();
 }
 
-export async function runMigrations() {
+async function runMigrations() {
   if (!sequelize) throw new Error('DB not configured');
   await sequelize.sync();
 }
 
-export async function createOrUpdateAdmin(admin) {
+async function createOrUpdateAdmin(admin) {
   if (!User) throw new Error('Models not initialized');
   const name = `${admin.first_name} ${admin.last_name}`.trim();
   const email = admin.email;
@@ -48,15 +51,52 @@ export async function createOrUpdateAdmin(admin) {
   return await User.create({ name, email, password, email_verified_at: new Date(), system_reserve: true });
 }
 
-export async function writeEnv(cfg) {
-  const lines = [
-    `DB_HOST=${cfg.DB_HOST}`,
-    `DB_PORT=${cfg.DB_PORT}`,
-    `DB_DATABASE=${cfg.DB_DATABASE}`,
-    `DB_USERNAME=${cfg.DB_USERNAME}`,
-    `DB_PASSWORD=${cfg.DB_PASSWORD}`
-  ];
-  await fs.appendFile('.env', '\n' + lines.join('\n') + '\n');
+async function writeEnv(cfg) {
+  try {
+    // Read existing .env file
+    let existingContent = '';
+    if (await fs.pathExists('.env')) {
+      existingContent = await fs.readFile('.env', 'utf8');
+    }
+    
+    // Parse existing environment variables
+    const existingVars = {};
+    existingContent.split('\n').forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+        const [key, ...valueParts] = trimmed.split('=');
+        existingVars[key.trim()] = valueParts.join('=').trim();
+      }
+    });
+    
+    // Merge with new database configuration
+    const mergedVars = {
+      ...existingVars,
+      DB_HOST: cfg.DB_HOST,
+      DB_PORT: cfg.DB_PORT,
+      DB_DATABASE: cfg.DB_DATABASE,
+      DB_USERNAME: cfg.DB_USERNAME,
+      DB_PASSWORD: cfg.DB_PASSWORD
+    };
+    
+    // Write merged configuration back to .env
+    const newContent = Object.entries(mergedVars)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n') + '\n';
+    
+    await fs.writeFile('.env', newContent);
+  } catch (error) {
+    console.error('Error writing .env file:', error);
+    // Fallback to append mode if merge fails
+    const lines = [
+      `DB_HOST=${cfg.DB_HOST}`,
+      `DB_PORT=${cfg.DB_PORT}`,
+      `DB_DATABASE=${cfg.DB_DATABASE}`,
+      `DB_USERNAME=${cfg.DB_USERNAME}`,
+      `DB_PASSWORD=${cfg.DB_PASSWORD}`
+    ];
+    await fs.appendFile('.env', '\n' + lines.join('\n') + '\n');
+  }
 }
 
 async function ensureDatabase(cfg) {
@@ -72,4 +112,12 @@ async function ensureDatabase(cfg) {
     await connection.end();
   }
 }
+
+module.exports = {
+  configureDb,
+  connectDb,
+  runMigrations,
+  createOrUpdateAdmin,
+  writeEnv
+};
 
