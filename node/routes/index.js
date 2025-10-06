@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import * as InstallController from '../src/controllers/InstallController.js';
+const { Router } = require('express');
+const InstallController = require('../src/controllers/InstallController.js');
 
 const router = Router();
 
@@ -26,4 +26,4 @@ router.post('/license', setRouteName('install.license.setup'), ...[].concat(Inst
 router.post('/database', setRouteName('install.database.config'), ...[].concat(InstallController.postDatabaseConfig));
 router.get('/completed', setRouteName('install.completed'), InstallController.getCompleted);
 
-export default router;
+module.exports = router;

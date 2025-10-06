@@ -1,7 +1,6 @@
 {
   "name": "bladelib-node",
   "version": "1.0.0",
-  "type": "module",
   "description": "Express + EJS port of phpblaze/bladelib Laravel package - Installation wizard with user model sync",
   "main": "index.js",
   "exports": {

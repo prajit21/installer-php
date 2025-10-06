@@ -1,4 +1,4 @@
-export const config = {
+const config = {
   name: process.env.APP_NAME || 'App',
   configuration: {
     version: { 'Node >= 18': '18' },
@@ -17,4 +17,6 @@ export const config = {
   installation: 'installation.json',
   localhost_url: ['localhost', '127.0.0.1', '[::1]', 'localhost:3000']
 };
+
+module.exports = { config };
 
