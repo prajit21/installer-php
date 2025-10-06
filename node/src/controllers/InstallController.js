@@ -4,8 +4,8 @@ import axios from 'axios';
 import { validationResult, body } from 'express-validator';
 import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
 import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
-import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody } from '../validators/index.js';
-import { configureDb, connectDb, runMigrations, seedIfNeeded, writeEnv } from '../lib/db.js';
+import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } from '../validators/index.js';
+import { configureDb, connectDb, runMigrations, writeEnv, createOrUpdateAdmin } from '../lib/db.js';
 
 export async function getRequirements(req, res) {
   await ensureInstallAssets();
@@ -15,18 +15,12 @@ export async function getRequirements(req, res) {
   res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
-export async function getDirectories(req, res) {
-  const directories = await chWr();
-  const configured = await iDconF();
-  res.render('stdir', { title: 'Directories', directories, configured });
-}
+export async function getDirectories(req, res) { return res.redirect('/install/requirements'); }
 
 export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
 
 export async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
-  const dirsConfigured = await getDirsConfigured();
-  if (!dirsConfigured) return res.redirect('/install/directories');
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
   if (await liSync()) return res.redirect('/install/database');
@@ -37,10 +31,10 @@ export const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { license, envato_username } = req.body;
     const resp = await axios.post('https://laravel.pixelstrap.net/verify/api/envato', {
-      key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: "TU8xRVFaVjlRTA==", server_ip: req.ip
+      key: String(license).trim(), envato_username, domain: req.protocol + '://' + req.get('host'), project_id: process.env.APP_ID, server_ip: req.ip
     }).catch(e => e.response);
     if (resp && resp.status === 200) {
       const pubDir = path.join(basePath(), 'public');
@@ -56,6 +50,7 @@ export const postLicense = [
       const ipPath = publicPath('cj7kl89.tmp');
       const serverIp = req.socket?.localAddress || req.ip || '';
       await fs.writeFile(ipPath, Buffer.from(serverIp).toString('base64'));
+      req.session.licenseVerified = true;
       return res.redirect('/install/database');
     }
     req.session._errors = { license: (resp?.data?.message) || 'Verification failed' };
@@ -75,15 +70,29 @@ export async function getDatabase(req, res) {
 }
 
 export const postDatabaseConfig = [
+  async (req, res, next) => {
+    try {
+      const validators = getAdminValidators();
+      for (const v of validators) { await v.run(req); }
+      return next();
+    } catch (e) { return next(e); }
+  },
   ...validateDbBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
     const { database, admin, is_import_data } = req.body;
-    await configureDb(database);
-    await connectDb(database);
-    await runMigrations(is_import_data);
-    if (!is_import_data && process.env.SPATIE_ENABLED === 'true' && admin) { /* no-op placeholder for roles */ }
+    try {
+      await configureDb(database);
+      await connectDb(database);
+      await runMigrations();
+      if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
+    } catch (e) {
+      const dbFieldErrors = mapDbConnectionError(e);
+      req.session._errors = dbFieldErrors;
+      req.session._old = req.body;
+      return res.redirect('back');
+    }
     if (is_import_data) {
       const dump = publicPath('db.sql');
       if (await fs.pathExists(dump)) { /* Loading SQL is out-of-scope for generic port */ }
@@ -137,9 +146,37 @@ export async function getBlockProject(req, res) {
   return res.json({ success: true });
 }
 
-function mapErrors(result) {
+function mapErrors(result, firstOnly = false) {
   const out = {};
-  for (const e of result.array()) out[e.path] = e.msg;
+  const arr = firstOnly ? result.array({ onlyFirstError: true }) : result.array();
+  for (const e of arr) out[e.path] = e.msg;
+  return out;
+}
+
+function mapDbConnectionError(err) {
+  const out = {};
+  const code = err?.parent?.code || err?.original?.code || err?.code || '';
+  const message = (err?.message || err?.parent?.sqlMessage || '').toString();
+  if (message.match(/Access denied/i) || /ER_ACCESS_DENIED_ERROR/.test(code)) {
+    out['database.DB_USERNAME'] = 'Access denied: invalid username or password';
+    out['database.DB_PASSWORD'] = 'Access denied: invalid username or password';
+    return out;
+  }
+  if (message.match(/Unknown database/i) || /ER_BAD_DB_ERROR/.test(code)) {
+    out['database.DB_DATABASE'] = 'Unknown database or insufficient privileges';
+    return out;
+  }
+  if (/ENOTFOUND|EAI_AGAIN/i.test(code) || message.match(/getaddrinfo|not known/i)) {
+    out['database.DB_HOST'] = 'Unable to resolve host';
+    return out;
+  }
+  if (/ECONNREFUSED|EHOSTUNREACH|ETIMEDOUT/i.test(code) || message.match(/connect ECONNREFUSED|timeout/i)) {
+    out['database.DB_HOST'] = 'Connection refused/unreachable';
+    out['database.DB_PORT'] = 'Check port and firewall';
+    return out;
+  }
+  // Default generic mapping
+  out['database.DB_HOST'] = message || 'Database connection error';
   return out;
 }
 

@@ -1,7 +1,7 @@
 export const config = {
   name: process.env.APP_NAME || 'App',
   configuration: {
-    version: { 'Node >= 26': '26' },
+    version: { 'Node >= 18': '18' },
     extensions: ['fs', 'path']
   },
   writables: ['public', 'public/install'],
