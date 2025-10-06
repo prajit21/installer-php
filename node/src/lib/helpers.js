@@ -31,7 +31,12 @@ export async function liSync() {
   
   // Check for localhost like PHP version does
   const currentUrl = process.env.APP_URL || '';
-  if (currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')) {
+  
+  // Decode the saved URL to check for localhost
+  const savedUrl = Buffer.from(jD, 'base64').toString('utf8');
+  
+  if (currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1') || 
+      savedUrl.includes('localhost') || savedUrl.includes('127.0.0.1')) {
     return true;
   }
   
@@ -40,8 +45,12 @@ export async function liSync() {
   }
   const cHost = tryGetHost(currentUrl);
   const dHost = tryGetHost(Buffer.from(jD, 'base64').toString('utf8'));
+  console.log('🌐 Current host:', cHost, 'Saved host:', dHost);
   const ipFile = publicPath('cj7kl89.tmp');
-  if (cHost && dHost && (cHost === dHost || cHost === 'www.' + dHost || 'www.' + cHost === dHost)) return true;
+  if (cHost && dHost && (cHost === dHost || cHost === 'www.' + dHost || 'www.' + cHost === dHost)) {
+    console.log('✅ Host match found, returning true');
+    return true;
+  }
   if (await fs.pathExists(ipFile)) {
     const jiP = await fs.readFile(ipFile, 'utf8');
     const savedIp = Buffer.from(jiP, 'base64').toString('utf8');
