@@ -18,19 +18,22 @@ const basicWizard = new InstallWizard({
 // Mount the wizard
 basicWizard.mount(app);
 
-// Example 2: With existing user model
-console.log('=== Example 2: With Existing User Model ===');
+// Example 2: With existing user model (commented out to avoid database connection issues)
+console.log('=== Example 2: With Existing User Model (Demo) ===');
+console.log('Note: This example requires a database connection.');
+console.log('See example-with-db.js for a complete working example with database.');
 
-// Simulate an existing user model
+// Uncomment the following code if you have a database running:
+/*
 const sequelize = new Sequelize({
   dialect: 'mysql',
   host: 'localhost',
-  database: 'test_db',
-  username: 'root',
-  password: 'password'
+  database: 'your_database',
+  username: 'your_username',
+  password: 'your_password',
+  logging: false
 });
 
-// Define a sample existing user model
 const ExistingUser = sequelize.define('User', {
   id: { type: Sequelize.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   name: { type: Sequelize.DataTypes.STRING, allowNull: false },
@@ -43,16 +46,13 @@ const ExistingUser = sequelize.define('User', {
   timestamps: true
 });
 
-// Check compatibility
 checkUserModelCompatibility(ExistingUser).then(compatibility => {
   console.log('User model compatibility:', compatibility);
   
   if (compatibility.compatible) {
-    // Sync with existing model
     syncUserModel(sequelize, ExistingUser).then(userModel => {
       console.log('User model synced successfully');
       
-      // Create wizard with synced model
       const advancedWizard = new InstallWizard({
         mountPath: '/advanced-install',
         userModel: userModel
@@ -62,6 +62,7 @@ checkUserModelCompatibility(ExistingUser).then(compatibility => {
     });
   }
 });
+*/
 
 // Example 3: Check installation status
 console.log('=== Example 3: Installation Status ===');
