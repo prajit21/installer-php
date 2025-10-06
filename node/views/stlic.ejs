@@ -1,5 +1,5 @@
 <% layout('layouts/stmv', { title: 'License' }) %>
-<% var errors = (typeof errors === 'object' && errors) || {}; var old = (typeof old === 'function') ? old : function(key, fallback){ return (typeof fallback !== 'undefined') ? fallback : ''; }; %>
+<% const fieldErrors = (typeof errors !== 'undefined' && errors) ? errors : {}; const getOld = (typeof old === 'function') ? old : function(key, fallback){ return (typeof fallback !== 'undefined') ? fallback : ''; }; %>
 <div class="wizard-step-3 d-block">
   <form action="/install/license" method="POST">
     <div class="row">
@@ -8,15 +8,15 @@
         <div class="form-group form-row mb-3">
           <label>Envato Username<span class="required-fill">*</span></label>
           <div>
-            <input type="text" name="envato_username" value="<%= old('envato_username','') %>" class="form-control" autocomplete="off">
-            <% if (errors.envato_username) { %><span class="text-danger"><%= errors.envato_username %></span><% } %>
+            <input type="text" name="envato_username" value="<%= getOld('envato_username','') %>" class="form-control" autocomplete="off">
+            <% if (fieldErrors.envato_username) { %><span class="text-danger"><%= fieldErrors.envato_username %></span><% } %>
           </div>
         </div>
         <div class="form-group form-row mb-3">
           <label class="col-lg-3">Envato Purchase Code<span class="required-fill">*</span></label>
           <div class="col-lg">
-            <input type="text" name="license" value="<%= old('license','') %>" class="form-control" autocomplete="off">
-            <% if (errors.license) { %><span class="text-danger"><%= errors.license %></span><% } %>
+            <input type="text" name="license" value="<%= getOld('license','') %>" class="form-control" autocomplete="off">
+            <% if (fieldErrors.license) { %><span class="text-danger"><%= fieldErrors.license %></span><% } %>
           </div>
         </div>
       </div>

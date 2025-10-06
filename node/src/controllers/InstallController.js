@@ -47,7 +47,30 @@ const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { 
+      const mapped = mapErrors(errors, true);
+      if (!req.session) {
+        const bodySnapshot = Object.assign({}, req.body || {});
+        const old = (key, fallback = '') => {
+          if (!key) return fallback;
+          const parts = String(key).split('.');
+          let current = bodySnapshot;
+          for (const part of parts) {
+            if (current && Object.prototype.hasOwnProperty.call(current, part)) {
+              current = current[part];
+            } else {
+              return fallback;
+            }
+          }
+          return current ?? fallback;
+        };
+        return res.status(422).render('stlic', { title: 'License', errors: mapped, old });
+      }
+      req.session._errors = mapped; 
+      req.session._old = req.body; 
+      const backUrl = req.get('Referrer') || (req.baseUrl ? req.baseUrl + '/license' : '/install/license');
+      return req.session.save(() => res.redirect(backUrl)); 
+    }
     const { license, envato_username } = req.body;
     
     // Check if we're in development/localhost mode
@@ -86,9 +109,29 @@ const postLicense = [
       req.session.licenseVerified = true;
       return res.redirect('database');
     }
-    
-    req.session._errors = { license: 'Verification failed' };
-    return res.redirect('back');
+
+    const verr = { license: 'Verification failed' };
+    if (!req.session) {
+      const bodySnapshot = Object.assign({}, req.body || {});
+      const old = (key, fallback = '') => {
+        if (!key) return fallback;
+        const parts = String(key).split('.');
+        let current = bodySnapshot;
+        for (const part of parts) {
+          if (current && Object.prototype.hasOwnProperty.call(current, part)) {
+            current = current[part];
+          } else {
+            return fallback;
+          }
+        }
+        return current ?? fallback;
+      };
+      return res.status(422).render('stlic', { title: 'License', errors: verr, old });
+    }
+    req.session._errors = verr;
+    req.session._old = req.body;
+    const backUrl = req.get('Referrer') || (req.baseUrl ? req.baseUrl + '/license' : '/install/license');
+    return req.session.save(() => res.redirect(backUrl));
   }
 ];
 
@@ -119,7 +162,30 @@ const postDatabaseConfig = [
   ...validateDbBody,
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) { req.session._errors = mapErrors(errors, true); req.session._old = req.body; return res.redirect('back'); }
+    if (!errors.isEmpty()) { 
+      const mapped = mapErrors(errors, true);
+      if (!req.session) {
+        const bodySnapshot = Object.assign({}, req.body || {});
+        const old = (key, fallback = '') => {
+          if (!key) return fallback;
+          const parts = String(key).split('.');
+          let current = bodySnapshot;
+          for (const part of parts) {
+            if (current && Object.prototype.hasOwnProperty.call(current, part)) {
+              current = current[part];
+            } else {
+              return fallback;
+            }
+          }
+          return current ?? fallback;
+        };
+        return res.status(422).render('stbat', { title: 'Database', errors: mapped, old });
+      }
+      req.session._errors = mapped; 
+      req.session._old = req.body; 
+      const backUrl = req.get('Referrer') || (req.baseUrl ? req.baseUrl + '/database' : '/install/database');
+      return req.session.save(() => res.redirect(backUrl)); 
+    }
     const { database, admin, is_import_data } = req.body;
     try {
       // Get existing user model from the installation wizard if available
@@ -134,9 +200,27 @@ const postDatabaseConfig = [
       if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
     } catch (e) {
       const dbFieldErrors = mapDbConnectionError(e);
+      if (!req.session) {
+        const bodySnapshot = Object.assign({}, req.body || {});
+        const old = (key, fallback = '') => {
+          if (!key) return fallback;
+          const parts = String(key).split('.');
+          let current = bodySnapshot;
+          for (const part of parts) {
+            if (current && Object.prototype.hasOwnProperty.call(current, part)) {
+              current = current[part];
+            } else {
+              return fallback;
+            }
+          }
+          return current ?? fallback;
+        };
+        return res.status(422).render('stbat', { title: 'Database', errors: dbFieldErrors, old });
+      }
       req.session._errors = dbFieldErrors;
       req.session._old = req.body;
-      return res.redirect('back');
+      const backUrl = req.get('Referrer') || (req.baseUrl ? req.baseUrl + '/database' : '/install/database');
+      return req.session.save(() => res.redirect(backUrl));
     }
     if (is_import_data) {
       const dump = publicPath('db.sql');
