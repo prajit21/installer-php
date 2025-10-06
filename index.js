@@ -4,7 +4,7 @@
  */
 
 export { default as InstallWizard } from './lib/install.js';
-export { UserModel, syncUserModel } from './lib/models.js';
+export { UserModel, syncUserModel, checkUserModelCompatibility } from './lib/models.js';
 export { configureDb, connectDb, runMigrations, createOrUpdateAdmin } from './node/src/lib/db.js';
 
 // Re-export commonly used utilities
