@@ -113,7 +113,6 @@ basicWizard.getStatus().then(status => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Basic installation wizard: http://localhost:${PORT}/install`);
-  console.log(`Advanced installation wizard: http://localhost:${PORT}/advanced-install`);
+console.log(`Server running on http://localhost:${PORT}`);
+console.log(`Installation wizard: http://localhost:${PORT}/install`);
 });
