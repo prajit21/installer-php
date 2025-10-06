@@ -28,7 +28,13 @@ export async function liSync() {
   if (!(await fs.pathExists(licPath))) return false;
   const jD = await fs.readFile(licPath, 'utf8');
   if (!jD) return false;
+  
+  // Check for localhost like PHP version does
   const currentUrl = process.env.APP_URL || '';
+  if (currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')) {
+    return true;
+  }
+  
   if (!/^(?:f|ht)tps?:\/\//i.test(currentUrl)) {
     // allow non-url values like localhost
   }

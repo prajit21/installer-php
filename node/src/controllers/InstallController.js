@@ -146,13 +146,38 @@ export async function getUnblock(req, res) {
 }
 
 export async function postResetLicense(req, res) {
-  const fp = path.join(basePath(), 'fzip.li.dic');
-  if (await fs.pathExists(fp)) {
-    const key = await fs.readFile(fp, 'utf8');
-    const rp = await axios.post('https://laravel.pixelstrap.net/verify/api/reset/license', { key }).catch(e => e.response);
-    return res.status(rp?.status || 500).json(rp?.data || {});
+  try {
+    // Clear all license files like PHP version does
+    for (const f of strAlPbFls()) { 
+      try { 
+        await fs.remove(f); 
+      } catch(e) {
+        console.log('Error removing file:', f, e.message);
+      } 
+    }
+    
+    // Also try to reset via API if license file exists
+    const fp = path.join(basePath(), 'fzip.li.dic');
+    if (await fs.pathExists(fp)) {
+      const key = await fs.readFile(fp, 'utf8');
+      const rp = await axios.post('https://laravel.pixelstrap.net/verify/api/reset/license', { key }).catch(e => e.response);
+      return res.status(rp?.status || 200).json({ 
+        success: true, 
+        message: 'License reset successfully',
+        ...rp?.data 
+      });
+    }
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'License files cleared successfully' 
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
-  return res.status(404).json({ message: 'Not Found' });
 }
 
 export async function getBlockProject(req, res) {
