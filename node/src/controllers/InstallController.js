@@ -135,7 +135,7 @@ const postDatabaseConfig = [
       req.session._old = { ...(req.session._old || {}), ...req.body }; 
       return res.redirect(getInstallBase(req) + '/database'); 
     }
-    const { database, admin } = req.body;
+    const { database = {}, admin = {} } = req.body;
     // Treat any truthy value as checked for import flag
     const is_import_data = !!(req.body.is_import_data);
     try {
@@ -145,10 +145,19 @@ const postDatabaseConfig = [
         userModel = req.app.locals.installWizard.options.existingUserModel;
       }
       
-      await configureDb(database, userModel);
-      await connectDb(database);
+      // Normalize types and trim values
+      const normalizedDb = {
+        DB_HOST: String(database.DB_HOST || '').trim(),
+        DB_PORT: String(database.DB_PORT || '').trim(),
+        DB_USERNAME: String(database.DB_USERNAME || '').trim(),
+        DB_PASSWORD: String(database.DB_PASSWORD || ''),
+        DB_DATABASE: String(database.DB_DATABASE || '').trim()
+      };
+
+      await configureDb(normalizedDb, userModel);
+      await connectDb();
       await runMigrations();
-      if (!is_import_data && admin) { await createOrUpdateAdmin(admin); }
+      if (!is_import_data && admin && admin.email) { await createOrUpdateAdmin(admin); }
     } catch (e) {
       const dbFieldErrors = mapDbConnectionError(e);
       req.session._errors = { ...(req.session._errors || {}), ...dbFieldErrors };

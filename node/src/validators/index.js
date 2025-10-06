@@ -18,10 +18,10 @@ const validateLicenseWithAdminBody = [
 ];
 
 const validateDbBody = [
-  body('database.DB_HOST').notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
-  body('database.DB_PORT').notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
-  body('database.DB_USERNAME').notEmpty().withMessage('Username is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in username'),
-  body('database.DB_DATABASE').notEmpty().withMessage('Database is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in database name')
+  body('database.DB_HOST').customSanitizer(v => typeof v === 'string' ? v.trim() : v).notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
+  body('database.DB_PORT').customSanitizer(v => String(v || '').trim()).notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
+  body('database.DB_USERNAME').customSanitizer(v => typeof v === 'string' ? v.trim() : v).notEmpty().withMessage('Username is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in username'),
+  body('database.DB_DATABASE').customSanitizer(v => typeof v === 'string' ? v.trim() : v).notEmpty().withMessage('Database is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in database name')
 ];
 
 function getDbValidators() {
