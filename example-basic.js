@@ -3,8 +3,8 @@
  * This demonstrates how to integrate the installation wizard without database connection
  */
 
-import express from 'express';
-import { InstallWizard } from './index.js';
+const express = require('express');
+const { InstallWizard } = require('./index.js');
 
 const app = express();
 

@@ -3,12 +3,12 @@
  * This tests that license verification creates the same files as PHP version
  */
 
-import express from 'express';
-import path from 'path';
-import ejsMate from 'ejs-mate';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import { InstallWizard } from './index.js';
+const express = require('express');
+const path = require('path');
+const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const { InstallWizard } = require('./index.js');
 
 // Load environment variables
 dotenv.config();
@@ -80,8 +80,9 @@ app.post('/test-license', async (req, res) => {
     const { license, envato_username } = req.body;
     
     // Simulate successful license verification
+    const fs = require('fs-extra');
     const pubDir = path.join(process.cwd(), 'public');
-    await import('fs-extra').then(fs => fs.default.ensureDir(pubDir));
+    await fs.ensureDir(pubDir);
     
     // Create the same files as the PHP version
     const fzipPath = path.join(pubDir, 'fzip.li.dic');
@@ -89,22 +90,16 @@ app.post('/test-license', async (req, res) => {
     const ipPath = path.join(pubDir, 'cj7kl89.tmp');
     
     // Write license key file
-    await import('fs-extra').then(fs => 
-      fs.default.writeFile(fzipPath, Buffer.from(String(license).trim()).toString('base64'))
-    );
+    await fs.writeFile(fzipPath, Buffer.from(String(license).trim()).toString('base64'));
     
     // Write URL log file
     const currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
     const cleaned = currentUrl.replace('block/license/verify', '').replace('install/license', '').replace('install/verify', '');
-    await import('fs-extra').then(fs => 
-      fs.default.writeFile(logPath, Buffer.from(cleaned).toString('base64'))
-    );
+    await fs.writeFile(logPath, Buffer.from(cleaned).toString('base64'));
     
     // Write IP file
     const serverIp = req.socket?.localAddress || req.ip || '';
-    await import('fs-extra').then(fs => 
-      fs.default.writeFile(ipPath, Buffer.from(serverIp).toString('base64'))
-    );
+    await fs.writeFile(ipPath, Buffer.from(serverIp).toString('base64'));
     
     res.json({ 
       success: true, 

@@ -3,12 +3,12 @@
  * This tests that the installer works completely without any database connection
  */
 
-import express from 'express';
-import path from 'path';
-import ejsMate from 'ejs-mate';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import { InstallWizard } from './index.js';
+const express = require('express');
+const path = require('path');
+const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const { InstallWizard } = require('./index.js');
 
 // Load environment variables
 dotenv.config();

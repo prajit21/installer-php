@@ -3,9 +3,9 @@
  * This shows how to use the package with an actual database connection
  */
 
-import express from 'express';
-import { InstallWizard, syncUserModel, checkUserModelCompatibility, configureDb, connectDb, runMigrations, createOrUpdateAdmin } from './index.js';
-import { Sequelize } from 'sequelize';
+const express = require('express');
+const { InstallWizard, syncUserModel, checkUserModelCompatibility, configureDb, connectDb, runMigrations, createOrUpdateAdmin } = require('./index.js');
+const { Sequelize } = require('sequelize');
 
 const app = express();
 

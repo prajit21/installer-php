@@ -4,12 +4,12 @@
  * but NO initial database connection required!
  */
 
-import express from 'express';
-import path from 'path';
-import ejsMate from 'ejs-mate';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import { InstallWizard, checkUserModelCompatibility } from './index.js';
+const express = require('express');
+const path = require('path');
+const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const { InstallWizard, checkUserModelCompatibility } = require('./index.js');
 
 // Load environment variables
 dotenv.config();

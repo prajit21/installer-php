@@ -3,13 +3,13 @@
  * This demonstrates how to integrate the installation wizard
  */
 
-import express from 'express';
-import path from 'path';
-import ejsMate from 'ejs-mate';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import { InstallWizard, syncUserModel, checkUserModelCompatibility } from './index.js';
-import { Sequelize } from 'sequelize';
+const express = require('express');
+const path = require('path');
+const ejsMate = require('ejs-mate');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const { InstallWizard, syncUserModel, checkUserModelCompatibility } = require('./index.js');
+const { Sequelize } = require('sequelize');
 
 // Load environment variables
 dotenv.config();
