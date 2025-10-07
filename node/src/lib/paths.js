@@ -1,10 +1,10 @@
-import path from 'path';
-import fs from 'fs-extra';
+const path = require('path');
+const fs = require('fs-extra');
 
-export function basePath(...p) { return path.join(process.cwd(), ...p); }
-export function publicPath(...p) { return basePath('public', ...p); }
+function basePath(...p) { return path.join(process.cwd(), ...p); }
+function publicPath(...p) { return basePath('public', ...p); }
 
-export async function ensureInstallAssets() {
+async function ensureInstallAssets() {
   const src = basePath('src/Packs');
   const dest = publicPath('install');
   await fs.ensureDir(dest);
@@ -31,4 +31,10 @@ export async function ensureInstallAssets() {
     }
   }
 }
+
+module.exports = {
+  basePath,
+  publicPath,
+  ensureInstallAssets
+};
 

@@ -1,12 +1,12 @@
-import path from 'path';
-import express from 'express';
-import session from 'express-session';
-import compression from 'compression';
-import methodOverride from 'method-override';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import routes from './node/routes/index.js';
-import ejsMate from 'ejs-mate';
+const path = require('path');
+const express = require('express');
+const session = require('express-session');
+const compression = require('compression');
+const methodOverride = require('method-override');
+const morgan = require('morgan');
+const dotenv = require('dotenv');
+const routes = require('./node/routes/index.js');
+const ejsMate = require('ejs-mate');
 
 dotenv.config();
 
@@ -29,7 +29,6 @@ app.use(
   })
 );
 
-const __dirname = path.resolve();
 app.engine('ejs', ejsMate);
 app.set('views', path.join(__dirname, 'node/views'));
 app.set('view engine', 'ejs');

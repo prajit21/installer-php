@@ -1,6 +1,6 @@
-import { body } from 'express-validator';
+const { body } = require('express-validator');
 
-export const validateLicenseBody = [
+const validateLicenseBody = [
   body('envato_username').notEmpty().withMessage('Envato Username is required'),
   body('license')
     .notEmpty().withMessage('License is required').bail()
@@ -8,7 +8,7 @@ export const validateLicenseBody = [
     .withMessage('Invalid purchase code')
 ];
 
-export const validateLicenseWithAdminBody = [
+const validateLicenseWithAdminBody = [
   ...validateLicenseBody,
   body('admin.first_name').optional().notEmpty(),
   body('admin.last_name').optional().notEmpty(),
@@ -17,14 +17,14 @@ export const validateLicenseWithAdminBody = [
   body('admin.password_confirmation').optional().custom((v, { req }) => v === req.body.admin?.password).withMessage('Passwords must match')
 ];
 
-export const validateDbBody = [
+const validateDbBody = [
   body('database.DB_HOST').notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
   body('database.DB_PORT').notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
   body('database.DB_USERNAME').notEmpty().withMessage('Username is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in username'),
   body('database.DB_DATABASE').notEmpty().withMessage('Database is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in database name')
 ];
 
-export function getDbValidators() {
+function getDbValidators() {
   return [
     body('database.DB_HOST').notEmpty().withMessage('Host is required').bail().matches(/^\S+$/).withMessage('There should be no whitespace in host name'),
     body('database.DB_PORT').notEmpty().withMessage('Port is required').bail().isInt({ min: 1, max: 65535 }).withMessage('Port must be a number').bail().matches(/^\S+$/).withMessage('There should be no whitespace in port number'),
@@ -33,7 +33,7 @@ export function getDbValidators() {
   ];
 }
 
-export function getAdminValidators() {
+function getAdminValidators() {
   return [
     body('admin.first_name').notEmpty().withMessage('first name is required'),
     body('admin.last_name').notEmpty().withMessage('last name is required'),
@@ -42,4 +42,12 @@ export function getAdminValidators() {
     body('admin.password_confirmation').notEmpty().withMessage('password confirmation is required').bail().custom((v, { req }) => v === req.body?.admin?.password).withMessage('Passwords must match')
   ];
 }
+
+module.exports = {
+  validateLicenseBody,
+  validateLicenseWithAdminBody,
+  validateDbBody,
+  getDbValidators,
+  getAdminValidators
+};
 
