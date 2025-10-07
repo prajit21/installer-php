@@ -1,12 +1,12 @@
-import { Sequelize, DataTypes } from 'sequelize';
-import mysql from 'mysql2/promise';
-import bcrypt from 'bcryptjs';
-import fs from 'fs-extra';
+const { Sequelize, DataTypes } = require('sequelize');
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+const fs = require('fs-extra');
 
 let sequelize = null;
 let User = null;
 
-export async function configureDb(cfg) {
+async function configureDb(cfg) {
   await ensureDatabase(cfg);
   sequelize = new Sequelize(cfg.DB_DATABASE, cfg.DB_USERNAME, cfg.DB_PASSWORD, {
     host: cfg.DB_HOST,
@@ -25,17 +25,17 @@ export async function configureDb(cfg) {
   }, { tableName: 'users', timestamps: true });
 }
 
-export async function connectDb() {
+async function connectDb() {
   if (!sequelize) throw new Error('DB not configured');
   await sequelize.authenticate();
 }
 
-export async function runMigrations() {
+async function runMigrations() {
   if (!sequelize) throw new Error('DB not configured');
   await sequelize.sync();
 }
 
-export async function createOrUpdateAdmin(admin) {
+async function createOrUpdateAdmin(admin) {
   if (!User) throw new Error('Models not initialized');
   const name = `${admin.first_name} ${admin.last_name}`.trim();
   const email = admin.email;
@@ -48,7 +48,7 @@ export async function createOrUpdateAdmin(admin) {
   return await User.create({ name, email, password, email_verified_at: new Date(), system_reserve: true });
 }
 
-export async function writeEnv(cfg) {
+async function writeEnv(cfg) {
   const lines = [
     `DB_HOST=${cfg.DB_HOST}`,
     `DB_PORT=${cfg.DB_PORT}`,
@@ -72,4 +72,12 @@ async function ensureDatabase(cfg) {
     await connection.end();
   }
 }
+
+module.exports = {
+  configureDb,
+  connectDb,
+  runMigrations,
+  createOrUpdateAdmin,
+  writeEnv
+};
 

@@ -2,7 +2,7 @@
   "name": "bladelib-node",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
+  "type": "commonjs",
   "description": "Express + EJS port of phpblaze/bladelib Laravel package",
   "main": "app.js",
   "scripts": {

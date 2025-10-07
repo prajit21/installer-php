@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs-extra';
-import axios from 'axios';
-import { validationResult, body } from 'express-validator';
-import { ensureInstallAssets, publicPath, basePath } from '../lib/paths.js';
-import { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } from '../lib/helpers.js';
-import { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } from '../validators/index.js';
-import { configureDb, connectDb, runMigrations, writeEnv, createOrUpdateAdmin } from '../lib/db.js';
+const path = require('path');
+const fs = require('fs-extra');
+const axios = require('axios');
+const { validationResult, body } = require('express-validator');
+const { ensureInstallAssets, publicPath, basePath } = require('../lib/paths.js');
+const { strPrp, strAlPbFls, strFlExs, strFilRM, liSync, migSync, datSync, strSync, scDotPkS, scSpatPkS, imIMgDuy, getC, conF, chWr, iDconF } = require('../lib/helpers.js');
+const { validateLicenseBody, validateLicenseWithAdminBody, validateDbBody, getAdminValidators } = require('../validators/index.js');
+const { configureDb, connectDb, runMigrations, writeEnv, createOrUpdateAdmin } = require('../lib/db.js');
 
-export async function getRequirements(req, res) {
+async function getRequirements(req, res) {
   await ensureInstallAssets();
   const c = getC();
   const configurations = { ...c.version, ...c.extensions };
@@ -15,11 +15,11 @@ export async function getRequirements(req, res) {
   res.render('strq', { title: 'Requirements', configurations, configured });
 }
 
-export async function getDirectories(req, res) { return res.redirect('/install/requirements'); }
+async function getDirectories(req, res) { return res.redirect('/install/requirements'); }
 
-export async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
+async function getVerifySetup(req, res) { res.render('stvi', { title: 'Verify' }); }
 
-export async function getLicense(req, res) {
+async function getLicense(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
   // Clear previous residual license files before showing license page
   for (const f of strAlPbFls()) { try { await fs.remove(f); } catch(e) {} }
@@ -27,7 +27,7 @@ export async function getLicense(req, res) {
   res.render('stlic', { title: 'License' });
 }
 
-export const postLicense = [
+const postLicense = [
   ...validateLicenseBody,
   async (req, res) => {
     const errors = validationResult(req);
@@ -58,7 +58,7 @@ export const postLicense = [
   }
 ];
 
-export async function getDatabase(req, res) {
+async function getDatabase(req, res) {
   if (!(await getConfigured())) return res.redirect('/install/requirements');
   if (!(await getDirsConfigured())) return res.redirect('/install/directories');
   if (!(await liSync())) return res.redirect('/install/license');
@@ -69,7 +69,7 @@ export async function getDatabase(req, res) {
   res.render('stbat', { title: 'Database' });
 }
 
-export const postDatabaseConfig = [
+const postDatabaseConfig = [
   async (req, res, next) => {
     try {
       const validators = getAdminValidators();
@@ -104,31 +104,31 @@ export const postDatabaseConfig = [
   }
 ];
 
-export async function getCompleted(req, res) {
+async function getCompleted(req, res) {
   if (!(await migSync())) return res.redirect('/install/database');
   const instFile = publicPath('installation.json');
   if (!(await fs.pathExists(instFile))) await fs.writeFile(instFile, '');
   res.render('co', { title: 'Installation Completed' });
 }
 
-export async function getBlockSetup(req, res) { res.render('stbl', { title: 'Verify' }); }
+async function getBlockSetup(req, res) { res.render('stbl', { title: 'Verify' }); }
 
-export const postUnblockVerify = postLicense;
+const postUnblockVerify = postLicense;
 
-export async function getErase(req, res) {
+async function getErase(req, res) {
   if (req.params.project_id !== process.env.APP_ID) return res.status(400).json({ error: 'Invalid Project ID' });
   await fs.remove(path.join(basePath(), '.vite.js'));
   for (const file of strAlPbFls()) await fs.remove(file).catch(() => {});
   return res.json({ success: true });
 }
 
-export async function getUnblock(req, res) {
+async function getUnblock(req, res) {
   // pHUnBlic(): remove block flag
   await fs.remove(path.join(basePath(), '.vite.js'));
   return res.json({ success: true });
 }
 
-export async function postResetLicense(req, res) {
+async function postResetLicense(req, res) {
   const fp = path.join(basePath(), 'fzip.li.dic');
   if (await fs.pathExists(fp)) {
     const key = await fs.readFile(fp, 'utf8');
@@ -138,7 +138,7 @@ export async function postResetLicense(req, res) {
   return res.status(404).json({ message: 'Not Found' });
 }
 
-export async function getBlockProject(req, res) {
+async function getBlockProject(req, res) {
   if (req.params.project_id !== process.env.APP_ID) return res.status(400).json({ error: 'Invalid Project ID' });
   const vite = path.join(basePath(), '.vite.js');
   if (!(await fs.pathExists(vite))) await fs.writeFile(vite, '');
@@ -182,4 +182,21 @@ function mapDbConnectionError(err) {
 
 async function getConfigured() { return true; }
 async function getDirsConfigured() { return true; }
+
+module.exports = {
+  getRequirements,
+  getDirectories,
+  getVerifySetup,
+  getLicense,
+  postLicense,
+  getDatabase,
+  postDatabaseConfig,
+  getCompleted,
+  getBlockSetup,
+  postUnblockVerify,
+  getErase,
+  getUnblock,
+  postResetLicense,
+  getBlockProject
+};
 
